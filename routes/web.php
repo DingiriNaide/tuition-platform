@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController\StudentProfileController;
 use App\Http\Controllers\ProfileController\TutorProfileController;
 use App\Http\Controllers\ProfileController\ParentProfileController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -11,7 +12,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', fn() => Inertia\Inertia::render('dashboard'))->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Student profile
     Route::prefix('profile/student')->name('student.profile.')->group(function () {
