@@ -2,6 +2,12 @@ import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
 
+interface Subject {
+    id: number;
+    name: string;
+    syllabus: string;
+}
+
 interface TutorProfile {
     id: number;
     full_name: string;
@@ -16,6 +22,7 @@ interface TutorProfile {
     is_active: boolean;
     rating: number;
     total_reviews: number;
+    subjects: Subject[];
 }
 
 interface Props {
@@ -40,6 +47,17 @@ export default function Show({ profile }: Props) {
             </AppLayout>
         );
     }
+
+    const syllabusLabel: Record<string, string> = {
+        ol: 'O/L', al: 'A/L', foundation: 'Foundation', general: 'General',
+    };
+
+    const subjectsByLevel = profile.subjects?.reduce((acc, subject) => {
+        const key = subject.syllabus;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(subject);
+        return acc;
+    }, {} as Record<string, Subject[]>) ?? {};
 
     return (
         <AppLayout>
@@ -67,7 +85,7 @@ export default function Show({ profile }: Props) {
                             </span>
                         </div>
                         <div className="ml-auto text-right">
-                            <p className="text-2xl font-semibold">{profile.rating.toFixed(1)} ★</p>
+                            <p className="text-2xl font-semibold">{Number(profile.rating).toFixed(1)} ★</p>
                             <p className="text-sm text-gray-500">{profile.total_reviews} reviews</p>
                         </div>
                     </div>
@@ -107,6 +125,29 @@ export default function Show({ profile }: Props) {
                         <p className="text-sm text-gray-500 mb-1">Bio</p>
                         <p className="text-gray-700 dark:text-gray-300">{profile.bio ?? '—'}</p>
                     </div>
+
+                    {profile.subjects?.length > 0 && (
+                        <div>
+                            <p className="text-sm text-gray-500 mb-2">Subjects</p>
+                            <div className="space-y-2">
+                                {Object.entries(subjectsByLevel).map(([level, subs]) => (
+                                    <div key={level}>
+                                        <p className="text-xs font-medium text-gray-400 uppercase mb-1">{syllabusLabel[level] ?? level}</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {subs.map(subject => (
+                                                <span
+                                                    key={subject.id}
+                                                    className="px-3 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm"
+                                                >
+                                                    {subject.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </div>

@@ -2,6 +2,12 @@ import { useForm, Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { update, show } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
 
+interface Subject {
+    id: number;
+    name: string;
+    syllabus: string;
+}
+
 interface TutorProfile {
     id: number;
     full_name: string;
@@ -12,28 +18,44 @@ interface TutorProfile {
     bio: string;
     hourly_rate: number;
     medium: string;
+    subjects: Subject[];
 }
 
 interface Props {
     profile: TutorProfile;
+    subjects: Subject[];
 }
 
-export default function Edit({ profile }: Props) {
+export default function Edit({ profile, subjects }: Props) {
     const { data, setData, put, processing, errors } = useForm({
-        full_name: profile.full_name ?? '',
-        phone: profile.phone ?? '',
-        nic_number: profile.nic_number ?? '',
-        city: profile.city ?? '',
-        district: profile.district ?? '',
-        bio: profile.bio ?? '',
+        full_name:   profile.full_name ?? '',
+        phone:       profile.phone ?? '',
+        nic_number:  profile.nic_number ?? '',
+        city:        profile.city ?? '',
+        district:    profile.district ?? '',
+        bio:         profile.bio ?? '',
         hourly_rate: profile.hourly_rate ?? '',
-        medium: profile.medium ?? 'english',
+        medium:      profile.medium ?? 'english',
+        subjects:    profile.subjects?.map(s => s.id) ?? [] as number[],
     });
+
+    function toggleSubject(id: number) {
+        const current = data.subjects;
+        if (current.includes(id)) {
+            setData('subjects', current.filter(s => s !== id));
+        } else {
+            setData('subjects', [...current, id]);
+        }
+    }
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
         put(update.url());
     }
+
+    const olSubjects         = subjects.filter(s => s.syllabus === 'ol');
+    const alSubjects         = subjects.filter(s => s.syllabus === 'al');
+    const foundationSubjects = subjects.filter(s => s.syllabus === 'foundation');
 
     return (
         <AppLayout>
@@ -131,6 +153,61 @@ export default function Edit({ profile }: Props) {
                         </select>
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Subjects You Teach</label>
+                        {errors.subjects && <p className="text-red-500 text-sm mb-2">{errors.subjects}</p>}
+
+                        <div className="space-y-3">
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase mb-2">O/L Subjects</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {olSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.subjects.includes(subject.id)}
+                                                onChange={() => toggleSubject(subject.id)}
+                                            />
+                                            <span className="text-sm">{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase mb-2">A/L Subjects</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {alSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.subjects.includes(subject.id)}
+                                                onChange={() => toggleSubject(subject.id)}
+                                            />
+                                            <span className="text-sm">{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase mb-2">Foundation</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {foundationSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.subjects.includes(subject.id)}
+                                                onChange={() => toggleSubject(subject.id)}
+                                            />
+                                            <span className="text-sm">{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex gap-3">
                         <button
                             type="submit"
@@ -139,7 +216,6 @@ export default function Edit({ profile }: Props) {
                         >
                             {processing ? 'Saving...' : 'Update Profile'}
                         </button>
-                        
                         <Link
                             href={show.url()}
                             className="flex-1 text-center border py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800"

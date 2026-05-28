@@ -2,7 +2,17 @@ import { useForm, Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { store } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
 
-export default function Create() {
+interface Subject {
+    id: number;
+    name: string;
+    syllabus: string;
+}
+
+interface Props {
+    subjects: Subject[];
+}
+
+export default function Create({ subjects }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         full_name: '',
         phone: '',
@@ -12,13 +22,26 @@ export default function Create() {
         bio: '',
         hourly_rate: '',
         medium: 'english',
+        subjects: [] as number[],
     });
 
+    function toggleSubject(id: number) {
+        const current = data.subjects;
+        if (current.includes(id)) {
+            setData('subjects', current.filter(s => s !== id));
+        } else {
+            setData('subjects', [...current, id]);
+        }
+    }
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
         post(store.url());
     }
+
+    const olSubjects = subjects.filter(s => s.syllabus === 'ol');
+    const alSubjects = subjects.filter(s => s.syllabus === 'al');
+    const foundationSubjects = subjects.filter(s => s.syllabus === 'foundation');
 
     return (
         <AppLayout>
@@ -114,6 +137,61 @@ export default function Create() {
                             <option value="tamil">Tamil</option>
                             <option value="bilingual">Bilingual</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Subjects You Teach</label>
+                        {errors.subjects && <p className="text-red-500 text-sm mb-2">{errors.subjects}</p>}
+
+                        <div className="space-y-3">
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase mb-2">O/L Subjects</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {olSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.subjects.includes(subject.id)}
+                                                onChange={() => toggleSubject(subject.id)}
+                                            />
+                                            <span className="text-sm">{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase mb-2">A/L Subjects</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {alSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.subjects.includes(subject.id)}
+                                                onChange={() => toggleSubject(subject.id)}
+                                            />
+                                            <span className="text-sm">{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase mb-2">Foundation</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {foundationSubjects.map(subject => (
+                                        <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.subjects.includes(subject.id)}
+                                                onChange={() => toggleSubject(subject.id)}
+                                            />
+                                            <span className="text-sm">{subject.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <button

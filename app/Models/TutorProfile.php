@@ -17,4 +17,11 @@ class TutorProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'tutor_subject')
+            ->withPivot('grade', 'rate_override', 'is_active')
+            ->withTimestamps();
+    }
 }

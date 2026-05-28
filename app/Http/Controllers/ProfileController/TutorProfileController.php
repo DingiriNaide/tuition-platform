@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ProfileController;
 
 use App\Http\Controllers\Controller;
 use App\Models\TutorProfile;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -12,7 +13,7 @@ class TutorProfileController extends Controller
 {
     public function show(Request $request): Response
     {
-        $profile = $request->user()->tutorProfile;
+        $profile = $request->user()->tutorProfile?->load('subjects');
 
         return Inertia::render('Profile/Tutor/Show', [
             'profile' => $profile,
@@ -21,7 +22,9 @@ class TutorProfileController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('Profile/Tutor/Create');
+        return Inertia::render('Profile/Tutor/Create', [
+            'subjects' => Subject::where('is_active', true)->get(['id', 'name', 'syllabus']),
+        ]);
     }
 
     public function store(Request $request)
@@ -35,21 +38,29 @@ class TutorProfileController extends Controller
             'bio'         => 'nullable|string|max:1000',
             'hourly_rate' => 'nullable|numeric|min:0',
             'medium'      => 'required|in:sinhala,tamil,english,bilingual',
+            'subjects'    => 'nullable|array',
+            'subjects.*'  => 'exists:subjects,id',
         ]);
 
-        $request->user()->tutorProfile()->create($validated);
+        $subjects = $validated['subjects'] ?? [];
+        unset($validated['subjects']);
+
+        $profile = $request->user()->tutorProfile()->create($validated);
+        $profile->subjects()->sync($subjects);
+
         $request->user()->assignRole('tutor');
 
-        return redirect()->route('tutor.profile.show')
+        return redirect()->to('/profile/tutor')
             ->with('success', 'Profile created successfully.');
     }
 
     public function edit(Request $request): Response
     {
-        $profile = $request->user()->tutorProfile;
+        $profile = $request->user()->tutorProfile->load('subjects');
 
         return Inertia::render('Profile/Tutor/Edit', [
-            'profile' => $profile,
+            'profile'  => $profile,
+            'subjects' => Subject::where('is_active', true)->get(['id', 'name', 'syllabus']),
         ]);
     }
 
@@ -64,11 +75,18 @@ class TutorProfileController extends Controller
             'bio'         => 'nullable|string|max:1000',
             'hourly_rate' => 'nullable|numeric|min:0',
             'medium'      => 'required|in:sinhala,tamil,english,bilingual',
+            'subjects'    => 'nullable|array',
+            'subjects.*'  => 'exists:subjects,id',
         ]);
 
-        $request->user()->tutorProfile()->update($validated);
+        $subjects = $validated['subjects'] ?? [];
+        unset($validated['subjects']);
 
-        return redirect()->route('tutor.profile.show')
+        $profile = $request->user()->tutorProfile;
+        $profile->update($validated);
+        $profile->subjects()->sync($subjects);
+
+        return redirect()->to('/profile/tutor')
             ->with('success', 'Profile updated successfully.');
     }
 }
