@@ -45,22 +45,34 @@ export default function AdminDashboard({ stats }: Props) {
                 <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
                     <h2 className="font-medium mb-3">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3">
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        <Link
+                            href="/admin/tutors"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
                             <p className="font-medium text-sm">Verify Tutors</p>
                             <p className="text-xs text-gray-500 mt-1">Review pending tutor applications</p>
-                        </button>
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        </Link>
+                        <Link
+                            href="/admin/subjects"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
                             <p className="font-medium text-sm">Manage Subjects</p>
                             <p className="text-xs text-gray-500 mt-1">Add or update platform subjects</p>
-                        </button>
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        </Link>
+                        <Link
+                            href="/admin/users"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
                             <p className="font-medium text-sm">User Management</p>
                             <p className="text-xs text-gray-500 mt-1">View and manage all users</p>
-                        </button>
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        </Link>
+                        <Link
+                            href="/admin/analytics"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
                             <p className="font-medium text-sm">Platform Analytics</p>
                             <p className="text-xs text-gray-500 mt-1">Revenue, growth, and usage stats</p>
-                        </button>
+                        </Link>
                     </div>
                 </div>
 

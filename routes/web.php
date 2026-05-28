@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController\StudentProfileController;
 use App\Http\Controllers\ProfileController\TutorProfileController;
 use App\Http\Controllers\ProfileController\ParentProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\TutorVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,6 +14,14 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->middleware('role:admin|super-admin')->group(function () {
+        Route::get('tutors', [TutorVerificationController::class, 'index'])->name('tutors.index');
+        Route::get('tutors/{tutorProfile}', [TutorVerificationController::class, 'show'])->name('tutors.show');
+        Route::post('tutors/{tutorProfile}/approve', [TutorVerificationController::class, 'approve'])->name('tutors.approve');
+        Route::post('tutors/{tutorProfile}/reject', [TutorVerificationController::class, 'reject'])->name('tutors.reject');
+    });
 
     // Student profile
     Route::prefix('profile/student')->name('student.profile.')->group(function () {
