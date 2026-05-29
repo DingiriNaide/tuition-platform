@@ -17,4 +17,10 @@ class Subject extends Model
             ->withPivot('grade', 'rate_override', 'is_active')
             ->withTimestamps();
     }
+
+    public function scopeActive($query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where('is_active', true);
+    }
+
 }

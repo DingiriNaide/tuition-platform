@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
+import { index, create } from '@/actions/App/Http/Controllers/CourseController'
 
 interface Subject {
     id: number;
@@ -153,6 +154,19 @@ export default function TutorDashboard({ profile, stats }: Props) {
                             <p className="font-medium text-sm">Earnings Report</p>
                             <p className="text-xs text-gray-500 mt-1">View your payment history</p>
                         </button>
+                    </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                    <h2 className="mb-3 font-semibold text-gray-900 dark:text-white">My Courses</h2>
+                    <div className="flex gap-3">
+                        <Link href={index.url()} className="text-sm text-indigo-600 hover:underline dark:text-indigo-400">
+                            View all courses
+                        </Link>
+                        <span className="text-gray-300 dark:text-gray-600">·</span>
+                        <Link href={create.url()} className="text-sm text-indigo-600 hover:underline dark:text-indigo-400">
+                            Create new course
+                        </Link>
                     </div>
                 </div>
 

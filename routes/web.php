@@ -5,17 +5,31 @@ use App\Http\Controllers\ProfileController\TutorProfileController;
 use App\Http\Controllers\ProfileController\ParentProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\TutorVerificationController;
+use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return Inertia\Inertia::render('welcome');
 })->name('home');
 
+// ── Tutor-only course management ─────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
+    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
+    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
+    Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
+    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
+    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+});
+
+// ── Public course routes (no auth required) ──────────────────────────
+Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Admin routes
+    // ── Admin routes ─────────────────────────────────────────────────
     Route::prefix('admin')->name('admin.')->middleware('role:admin|super-admin')->group(function () {
         Route::get('tutors', [TutorVerificationController::class, 'index'])->name('tutors.index');
         Route::get('tutors/{tutorProfile}', [TutorVerificationController::class, 'show'])->name('tutors.show');
@@ -23,7 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('tutors/{tutorProfile}/reject', [TutorVerificationController::class, 'reject'])->name('tutors.reject');
     });
 
-    // Student profile
+    // ── Student profile ───────────────────────────────────────────────
     Route::prefix('profile/student')->name('student.profile.')->group(function () {
         Route::get('/', [StudentProfileController::class, 'show'])->name('show');
         Route::get('/create', [StudentProfileController::class, 'create'])->name('create');
@@ -32,7 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/', [StudentProfileController::class, 'update'])->name('update');
     });
 
-    // Tutor profile
+    // ── Tutor profile ─────────────────────────────────────────────────
     Route::prefix('profile/tutor')->name('tutor.profile.')->group(function () {
         Route::get('/', [TutorProfileController::class, 'show'])->name('show');
         Route::get('/create', [TutorProfileController::class, 'create'])->name('create');
@@ -41,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/', [TutorProfileController::class, 'update'])->name('update');
     });
 
-    // Parent profile
+    // ── Parent profile ────────────────────────────────────────────────
     Route::prefix('profile/parent')->name('parent.profile.')->group(function () {
         Route::get('/', [ParentProfileController::class, 'show'])->name('show');
         Route::get('/create', [ParentProfileController::class, 'create'])->name('create');

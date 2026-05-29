@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 
 export default function NoRole() {
@@ -11,29 +11,32 @@ export default function NoRole() {
 
                 <div className="grid grid-cols-3 gap-4">
                     
+                    <Link
                         href="/profile/student/create"
                         className="border rounded-lg p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition block"
                     >
                         <p className="text-2xl mb-2">🎓</p>
                         <p className="font-medium">I am a Student</p>
                         <p className="text-xs text-gray-500 mt-1">Find tutors and join classes</p>
-                    </a>
+                    </Link>
                     
+                    <Link
                         href="/profile/tutor/create"
                         className="border rounded-lg p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition block"
                     >
                         <p className="text-2xl mb-2">👨‍🏫</p>
                         <p className="font-medium">I am a Tutor</p>
                         <p className="text-xs text-gray-500 mt-1">Create courses and teach students</p>
-                    </a>
+                    </Link>
                     
+                    <Link
                         href="/profile/parent/create"
                         className="border rounded-lg p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition block"
                     >
                         <p className="text-2xl mb-2">👨‍👩‍👧</p>
                         <p className="font-medium">I am a Parent</p>
                         <p className="text-xs text-gray-500 mt-1">Monitor your child's progress</p>
-                    </a>
+                    </Link>
                 </div>
             </div>
         </AppLayout>
