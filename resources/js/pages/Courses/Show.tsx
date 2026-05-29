@@ -1,8 +1,10 @@
 // resources/js/pages/Courses/Show.tsx
 
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { edit, destroy, index } from '@/actions/App/Http/Controllers/CourseController';
+import { create as createBooking } from '@/actions/App/Http/Controllers/BookingController';
+import { useState } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -29,6 +31,7 @@ interface Course {
         district: string;
         rating: string | null;
         total_reviews: number;
+        user_id: number;
     };
     subject: {
         id: number;
@@ -46,6 +49,11 @@ interface Props {
     mediumOptions: Record<string, string>;
 }
 
+interface AuthUser {
+    id: number;
+    roles: string[];
+}
+
 // ── Component ─────────────────────────────────────────────────────────
 
 export default function CourseShow({
@@ -55,6 +63,10 @@ export default function CourseShow({
     syllabusOptions,
     mediumOptions,
 }: Props) {
+    const { auth } = usePage<{ auth: { user: AuthUser | null } }>().props;
+
+    const isStudent = auth.user?.roles?.includes('student') ?? false;
+
     function handleDelete(): void {
         if (!confirm(`Delete "${course.title}"? This cannot be undone.`)) return;
         router.delete(destroy.url(course.id), {
@@ -82,8 +94,7 @@ export default function CourseShow({
 
                 {/* ── Header ── */}
                 <div className="mb-6 flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                        {/* Badges */}
+                    <div className="min-w-0 flex-1">
                         <div className="mb-2 flex flex-wrap gap-2">
                             <Badge color="indigo">{course.subject.name}</Badge>
                             <Badge color="blue">
@@ -92,12 +103,9 @@ export default function CourseShow({
                             <Badge color="purple">
                                 {mediumOptions[course.medium] ?? course.medium}
                             </Badge>
-                            {!course.is_active && (
-                                <Badge color="red">Inactive</Badge>
-                            )}
+                            {!course.is_active && <Badge color="red">Inactive</Badge>}
                         </div>
 
-                        {/* Title */}
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                             {course.title}
                         </h1>
@@ -113,7 +121,7 @@ export default function CourseShow({
                         )}
                     </div>
 
-                    {/* ── Owner actions — only visible to owner/admin ── */}
+                    {/* Owner actions */}
                     {canManage && (
                         <div className="flex shrink-0 items-center gap-2">
                             <Link
@@ -127,7 +135,7 @@ export default function CourseShow({
                             </Link>
                             <button
                                 onClick={handleDelete}
-                                className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
                             >
                                 <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                     <path
@@ -180,7 +188,7 @@ export default function CourseShow({
                             </section>
                         )}
 
-                        {/* Details */}
+                        {/* Details grid */}
                         <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                             <h2 className="mb-4 text-base font-semibold text-gray-900 dark:text-white">
                                 Course Details
@@ -233,7 +241,7 @@ export default function CourseShow({
                     {/* ── Sidebar ── */}
                     <div className="space-y-4">
 
-                        {/* Pricing */}
+                        {/* Pricing + booking CTA */}
                         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                             <h2 className="mb-3 text-base font-semibold text-gray-900 dark:text-white">
                                 Pricing
@@ -264,21 +272,39 @@ export default function CourseShow({
                             )}
 
                             {!course.price_per_session && !course.price_monthly && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
                                     Contact tutor for pricing
                                 </p>
                             )}
 
-                            <button
-                                disabled
-                                title="Booking coming soon"
-                                className="mt-4 w-full cursor-not-allowed rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white opacity-60"
-                            >
-                                Book a Session
-                            </button>
-                            <p className="mt-1 text-center text-xs text-gray-400 dark:text-gray-500">
-                                Booking coming soon
-                            </p>
+                            {/* ── Booking button — behaviour depends on who is viewing ── */}
+                            {isStudent ? (
+                                // Student: link to booking form pre-filled with this course
+                                <Link
+                                    href={`${createBooking.url()}?course_id=${course.id}`}
+                                    className="mt-4 block w-full rounded-md bg-indigo-600 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                >
+                                    Book a Session
+                                </Link>
+                            ) : canManage ? (
+                                // Tutor/admin who owns the course: no booking, show edit shortcut
+                                <Link
+                                    href={edit.url(course.id)}
+                                    className="mt-4 block w-full rounded-md border border-indigo-300 py-2 text-center text-sm font-semibold text-indigo-600 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
+                                >
+                                    Edit Course
+                                </Link>
+                            ) : auth.user ? (
+                                // Logged in but wrong role (e.g. parent)
+                                <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
+                                    A student account is required to book this course.
+                                </p>
+                            ) : (
+                                // Guest
+                                <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
+                                    Sign in as a student to book this course.
+                                </p>
+                            )}
                         </div>
 
                         {/* Tutor info */}
@@ -305,7 +331,7 @@ export default function CourseShow({
                             )}
                         </div>
 
-                        {/* Owner quick-actions repeated in sidebar for visibility */}
+                        {/* Tutor/admin manage panel in sidebar */}
                         {canManage && (
                             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
                                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
@@ -334,7 +360,7 @@ export default function CourseShow({
     );
 }
 
-// ── Shared sub-components ─────────────────────────────────────────────
+// ── Sub-components ────────────────────────────────────────────────────
 
 function Badge({
     color,
@@ -343,7 +369,7 @@ function Badge({
     color: 'indigo' | 'blue' | 'purple' | 'red' | 'green';
     children: React.ReactNode;
 }) {
-    const palettes = {
+    const palettes: Record<string, string> = {
         indigo: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
         blue:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
         purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
@@ -352,9 +378,7 @@ function Badge({
     };
 
     return (
-        <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${palettes[color]}`}
-        >
+        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${palettes[color]}`}>
             {children}
         </span>
     );

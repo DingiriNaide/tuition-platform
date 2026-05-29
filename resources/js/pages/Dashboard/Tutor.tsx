@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
-import { index, create } from '@/actions/App/Http/Controllers/CourseController'
+import { index, create as createCourse } from '@/actions/App/Http/Controllers/CourseController'
 
 interface Subject {
     id: number;
@@ -164,7 +164,7 @@ export default function TutorDashboard({ profile, stats }: Props) {
                             View all courses
                         </Link>
                         <span className="text-gray-300 dark:text-gray-600">·</span>
-                        <Link href={create.url()} className="text-sm text-indigo-600 hover:underline dark:text-indigo-400">
+                        <Link href={createCourse.url()} className="text-sm text-indigo-600 hover:underline dark:text-indigo-400">
                             Create new course
                         </Link>
                     </div>

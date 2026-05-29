@@ -6,30 +6,55 @@ use App\Http\Controllers\ProfileController\ParentProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\TutorVerificationController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return Inertia\Inertia::render('welcome');
 })->name('home');
 
-// ── Tutor-only course management ─────────────────────────────────
-Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
-    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
-    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
-    Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
-    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
-    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
-});
-
-// ── Public course routes (no auth required) ──────────────────────────
-Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // ── Admin routes ─────────────────────────────────────────────────
+    // ── Courses (public within auth) ──────────────────────────────────
+    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+
+    // ── Courses (tutor/admin only) ────────────────────────────────────
+    Route::middleware('role:tutor|admin|super-admin')->group(function () {
+        Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
+        Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
+        Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
+        Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
+        Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+    });
+
+    // ── Schedules (tutor/admin only) ──────────────────────────────────
+    Route::middleware('role:tutor|admin|super-admin')->group(function () {
+        Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+        Route::get('/schedules/create', [ScheduleController::class, 'create'])->name('schedules.create');
+        Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
+        Route::get('/schedules/{schedule}/edit', [ScheduleController::class, 'edit'])->name('schedules.edit');
+        Route::put('/schedules/{schedule}', [ScheduleController::class, 'update'])->name('schedules.update');
+        Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
+        Route::get('/tutor/bookings', [BookingController::class, 'tutorBookings'])->name('tutor.bookings');
+        Route::post('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+    });
+
+    // ── Bookings (student only) ───────────────────────────────────────
+    Route::middleware('role:student')->group(function () {
+        Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+        Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+        Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    });
+
+    // ── Booking detail (all roles) ────────────────────────────────────
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+
+    // ── Admin ─────────────────────────────────────────────────────────
     Route::prefix('admin')->name('admin.')->middleware('role:admin|super-admin')->group(function () {
         Route::get('tutors', [TutorVerificationController::class, 'index'])->name('tutors.index');
         Route::get('tutors/{tutorProfile}', [TutorVerificationController::class, 'show'])->name('tutors.show');
