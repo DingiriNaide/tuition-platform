@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\TutorVerificationController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ProgressReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,11 +22,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Courses (public within auth) ──────────────────────────────────
     Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
     Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
     // ── Courses (tutor/admin only) ────────────────────────────────────
     Route::middleware('role:tutor|admin|super-admin')->group(function () {
-        Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
         Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
         Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
         Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
@@ -87,6 +89,56 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [ParentProfileController::class, 'store'])->name('store');
         Route::get('/edit', [ParentProfileController::class, 'edit'])->name('edit');
         Route::put('/', [ParentProfileController::class, 'update'])->name('update');
+    });
+
+    // ── Attendance ────────────────────────────────────────────────────────
+
+    // Tutor: mark attendance for a session
+    Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
+        Route::get('/attendance/{bookingSession}/mark', [AttendanceController::class, 'mark'])
+            ->name('attendance.mark');
+        Route::post('/attendance/{bookingSession}', [AttendanceController::class, 'store'])
+            ->name('attendance.store');
+    });
+
+    // Tutor + student + admin: view roster for a booking
+    Route::middleware(['auth', 'verified'])->group(function (): void {
+        Route::get('/bookings/{booking}/attendance', [AttendanceController::class, 'bookingRoster'])
+            ->name('attendance.roster');
+    });
+
+    // Student: own attendance summary
+    Route::middleware(['auth', 'verified', 'role:student'])->group(function (): void {
+        Route::get('/attendance', [AttendanceController::class, 'studentSummary'])
+            ->name('attendance.student');
+    });
+
+    // ── Progress Reports ──────────────────────────────────────────────────
+
+    // Tutor-only management
+    Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
+        Route::get('/progress-reports', [ProgressReportController::class, 'index'])
+            ->name('progress-reports.index');
+        Route::get('/bookings/{booking}/progress-reports/create', [ProgressReportController::class, 'create'])
+            ->name('progress-reports.create');
+        Route::post('/bookings/{booking}/progress-reports', [ProgressReportController::class, 'store'])
+            ->name('progress-reports.store');
+        Route::get('/progress-reports/{progressReport}/edit', [ProgressReportController::class, 'edit'])
+            ->name('progress-reports.edit');
+        Route::put('/progress-reports/{progressReport}', [ProgressReportController::class, 'update'])
+            ->name('progress-reports.update');
+    });
+
+    // Student: own published reports
+    Route::middleware(['auth', 'verified', 'role:student'])->group(function (): void {
+        Route::get('/my-progress', [ProgressReportController::class, 'studentReports'])
+            ->name('progress-reports.student');
+    });
+
+    // Shared: view single report (auth guards applied inside controller)
+    Route::middleware(['auth', 'verified'])->group(function (): void {
+        Route::get('/progress-reports/{progressReport}', [ProgressReportController::class, 'show'])
+            ->name('progress-reports.show');
     });
 
 });

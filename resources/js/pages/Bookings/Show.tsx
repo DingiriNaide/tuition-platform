@@ -1,7 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, usePage } from '@inertiajs/react';
-import { cancel, confirm } from '@/actions/App/Http/Controllers/BookingController';
+import { Head, router, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { cancel, confirm } from '@/actions/App/Http/Controllers/BookingController';
+import { bookingRoster } from '@/actions/App/Http/Controllers/AttendanceController';
+import { create as createReport } from '@/actions/App/Http/Controllers/ProgressReportController';
+import { index as reportsIndex } from '@/actions/App/Http/Controllers/ProgressReportController';
 
 interface Session {
     id: number;
@@ -260,7 +263,7 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                         </div>
 
                         {/* Actions */}
-                        {(canConfirm || canCancel) && (
+                        {(canConfirm || canCancel || isTutor || isAdmin) && (
                             <div className="space-y-2">
                                 {canConfirm && (
                                     <button
@@ -270,6 +273,33 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                         Confirm Booking
                                     </button>
                                 )}
+
+                                {/* Attendance roster — visible to tutor and student */}
+                                <Link
+                                    href={bookingRoster.url(booking.id)}
+                                    className="block w-full rounded-md border border-indigo-300 px-4 py-2 text-center text-sm font-semibold text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
+                                >
+                                    View Attendance
+                                </Link>
+
+                                {/* Progress report actions — tutor only */}
+                                {isTutor && (
+                                    <>
+                                        <Link
+                                            href={createReport.url(booking.id)}
+                                            className="block w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        >
+                                            Write Progress Report
+                                        </Link>
+                                        <Link
+                                            href={reportsIndex.url()}
+                                            className="block w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        >
+                                            All My Reports
+                                        </Link>
+                                    </>
+                                )}
+
                                 {canCancel && (
                                     <button
                                         onClick={() => setShowCancelModal(true)}

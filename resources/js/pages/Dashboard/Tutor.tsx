@@ -138,7 +138,7 @@ export default function TutorDashboard({ profile, stats }: Props) {
                 <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
                     <h2 className="font-medium mb-3">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3">
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        {/* <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                             <p className="font-medium text-sm">Create Course</p>
                             <p className="text-xs text-gray-500 mt-1">List a new course for students</p>
                         </button>
@@ -153,7 +153,35 @@ export default function TutorDashboard({ profile, stats }: Props) {
                         <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                             <p className="font-medium text-sm">Earnings Report</p>
                             <p className="text-xs text-gray-500 mt-1">View your payment history</p>
-                        </button>
+                        </button> */}
+                        <Link
+                            href="/courses/create"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
+                            <p className="font-medium text-sm">Create Course</p>
+                            <p className="text-xs text-gray-500 mt-1">List a new course for students</p>
+                        </Link>
+                        <Link
+                            href="/schedules/create"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
+                            <p className="font-medium text-sm">Schedule Class</p>
+                            <p className="text-xs text-gray-500 mt-1">Set up an upcoming session</p>
+                        </Link>
+                        <Link
+                            href="/assignment/view"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
+                            <p className="font-medium text-sm">View Assignments</p>
+                            <p className="text-xs text-gray-500 mt-1">Review student submissions</p>
+                        </Link>
+                        <Link
+                            href="/profile/analytics"
+                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
+                        >
+                            <p className="font-medium text-sm">Earnings Report</p>
+                            <p className="text-xs text-gray-500 mt-1">View your payment history</p>
+                        </Link>
                     </div>
                 </div>
 

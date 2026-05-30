@@ -63,6 +63,16 @@ class Booking extends Model
         return $this->hasMany(BookingSession::class);
     }
 
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function progressReports(): HasMany
+    {
+        return $this->hasMany(ProgressReport::class);
+    }
+
     // ── Scopes ───────────────────────────────────────────────────────
 
     public function scopePending($query): \Illuminate\Database\Eloquent\Builder

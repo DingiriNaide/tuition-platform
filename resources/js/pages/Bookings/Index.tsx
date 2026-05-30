@@ -110,7 +110,7 @@ export default function BookingsIndex({ bookings }: Props) {
                                                     key={s.id}
                                                     className="rounded bg-indigo-50 px-2 py-0.5 text-xs text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-300"
                                                 >
-                                                    {s.session_date}
+                                                    {formatDate(s.session_date)}
                                                 </span>
                                             ))}
                                         {booking.sessions.filter((s) => s.status === 'scheduled').length > 4 && (

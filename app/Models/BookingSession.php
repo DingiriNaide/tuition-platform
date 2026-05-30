@@ -9,6 +9,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BookingSession extends Model
 {
@@ -44,6 +45,11 @@ class BookingSession extends Model
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    public function attendanceRecord(): HasOne
+    {
+        return $this->hasOne(AttendanceRecord::class);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────

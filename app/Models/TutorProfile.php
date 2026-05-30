@@ -15,6 +15,8 @@ class TutorProfile extends Model
         'medium', 'is_verified', 'is_active', 'rating', 'total_reviews',
     ];
 
+    // ── Relationships ────────────────────────────────────────────────
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -35,5 +37,15 @@ class TutorProfile extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function progressReports(): HasMany
+    {
+        return $this->hasMany(ProgressReport::class);
     }
 }
