@@ -140,15 +140,16 @@ class BookingController extends Controller
             return back()->with('error', 'You already have an active booking for this schedule.');
         }
 
+        $startDate    = Carbon::parse($validated['start_date'])->timezone('Asia/Colombo');
+        $sessionCount = count($schedule->occurrencesBetween($startDate, $startDate->copy()->addWeeks(4)));
+
         $amountDue = $validated['billing_type'] === 'monthly'
             ? (float) ($course->price_monthly ?? 0)
-            : (float) ($course->price_per_session ?? 0);
+            : 0.0; // will increment as sessions are attended
 
         DB::transaction(function () use (
-            $validated, $studentProfile, $course, $schedule, $amountDue
+            $validated, $studentProfile, $course, $schedule, $amountDue, $startDate
         ): void {
-            $startDate = Carbon::parse($validated['start_date'])->timezone('Asia/Colombo');
-
             $booking = Booking::create([
                 'student_profile_id' => $studentProfile->id,
                 'course_id'          => $course->id,
@@ -162,7 +163,6 @@ class BookingController extends Controller
                 'notes'              => $validated['notes'] ?? null,
             ]);
 
-            // Generate initial session instances (4 weeks for recurring, 1 for one-off)
             $this->generateSessions($booking, $schedule, $startDate);
         });
 

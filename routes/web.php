@@ -10,6 +10,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ProgressReportController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -91,56 +92,88 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/', [ParentProfileController::class, 'update'])->name('update');
     });
 
-    // ── Attendance ────────────────────────────────────────────────────────
-
-    // Tutor: mark attendance for a session
-    Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
-        Route::get('/attendance/{bookingSession}/mark', [AttendanceController::class, 'mark'])
-            ->name('attendance.mark');
-        Route::post('/attendance/{bookingSession}', [AttendanceController::class, 'store'])
-            ->name('attendance.store');
-    });
-
-    // Tutor + student + admin: view roster for a booking
-    Route::middleware(['auth', 'verified'])->group(function (): void {
-        Route::get('/bookings/{booking}/attendance', [AttendanceController::class, 'bookingRoster'])
-            ->name('attendance.roster');
-    });
-
-    // Student: own attendance summary
-    Route::middleware(['auth', 'verified', 'role:student'])->group(function (): void {
-        Route::get('/attendance', [AttendanceController::class, 'studentSummary'])
-            ->name('attendance.student');
-    });
-
-    // ── Progress Reports ──────────────────────────────────────────────────
-
-    // Tutor-only management
-    Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
-        Route::get('/progress-reports', [ProgressReportController::class, 'index'])
-            ->name('progress-reports.index');
-        Route::get('/bookings/{booking}/progress-reports/create', [ProgressReportController::class, 'create'])
-            ->name('progress-reports.create');
-        Route::post('/bookings/{booking}/progress-reports', [ProgressReportController::class, 'store'])
-            ->name('progress-reports.store');
-        Route::get('/progress-reports/{progressReport}/edit', [ProgressReportController::class, 'edit'])
-            ->name('progress-reports.edit');
-        Route::put('/progress-reports/{progressReport}', [ProgressReportController::class, 'update'])
-            ->name('progress-reports.update');
-    });
-
-    // Student: own published reports
-    Route::middleware(['auth', 'verified', 'role:student'])->group(function (): void {
-        Route::get('/my-progress', [ProgressReportController::class, 'studentReports'])
-            ->name('progress-reports.student');
-    });
-
-    // Shared: view single report (auth guards applied inside controller)
-    Route::middleware(['auth', 'verified'])->group(function (): void {
-        Route::get('/progress-reports/{progressReport}', [ProgressReportController::class, 'show'])
-            ->name('progress-reports.show');
-    });
-
 });
+
+// ── Attendance ────────────────────────────────────────────────────────
+
+// Tutor: mark attendance for a session
+Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
+    Route::get('/attendance/{bookingSession}/mark', [AttendanceController::class, 'mark'])
+        ->name('attendance.mark');
+    Route::post('/attendance/{bookingSession}', [AttendanceController::class, 'store'])
+        ->name('attendance.store');
+});
+
+// Tutor + student + admin: view roster for a booking
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/bookings/{booking}/attendance', [AttendanceController::class, 'bookingRoster'])
+        ->name('attendance.roster');
+});
+
+// Student: own attendance summary
+Route::middleware(['auth', 'verified', 'role:student'])->group(function (): void {
+    Route::get('/attendance', [AttendanceController::class, 'studentSummary'])
+        ->name('attendance.student');
+});
+
+// ── Progress Reports ──────────────────────────────────────────────────
+
+// Tutor-only management
+Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
+    Route::get('/progress-reports', [ProgressReportController::class, 'index'])
+        ->name('progress-reports.index');
+    Route::get('/bookings/{booking}/progress-reports/create', [ProgressReportController::class, 'create'])
+        ->name('progress-reports.create');
+    Route::post('/bookings/{booking}/progress-reports', [ProgressReportController::class, 'store'])
+        ->name('progress-reports.store');
+    Route::get('/progress-reports/{progressReport}/edit', [ProgressReportController::class, 'edit'])
+        ->name('progress-reports.edit');
+    Route::put('/progress-reports/{progressReport}', [ProgressReportController::class, 'update'])
+        ->name('progress-reports.update');
+});
+
+// Student: own published reports
+Route::middleware(['auth', 'verified', 'role:student'])->group(function (): void {
+    Route::get('/my-progress', [ProgressReportController::class, 'studentReports'])
+        ->name('progress-reports.student');
+});
+
+// Shared: view single report (auth guards applied inside controller)
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/progress-reports/{progressReport}', [ProgressReportController::class, 'show'])
+        ->name('progress-reports.show');
+});
+
+// ─── Payments ────────────────────────────────────────────────────────────────
+
+// Student-facing (auth required)
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/bookings/{booking}/pay', [PaymentController::class, 'initiate'])
+        ->name('payments.initiate')
+        ->middleware('role:student');
+
+    Route::post('/payments/mock/checkout', [PaymentController::class, 'mockCheckout'])
+        ->name('payments.mock.checkout');
+
+    Route::post('/payments/mock/success', [PaymentController::class, 'mockSuccess'])
+        ->name('payments.mock.success');
+
+    Route::post('/payments/mock/fail', [PaymentController::class, 'mockFail'])
+        ->name('payments.mock.fail');
+
+    Route::get('/payments/return', [PaymentController::class, 'return'])
+        ->name('payments.return');
+
+    Route::get('/payments/cancel', [PaymentController::class, 'cancel'])
+        ->name('payments.cancel');
+
+    Route::get('/my-payments', [PaymentController::class, 'index'])
+        ->name('payments.index');
+});
+
+// Webhook — NO auth, NO CSRF (PayHere posts server-to-server)
+Route::post('/payments/webhook/payhere', [PaymentController::class, 'webhook'])
+    ->name('payments.webhook')
+    ->withoutMiddleware(['web', \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 require __DIR__.'/settings.php';

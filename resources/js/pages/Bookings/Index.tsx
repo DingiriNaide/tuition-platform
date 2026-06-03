@@ -83,7 +83,7 @@ export default function BookingsIndex({ bookings }: Props) {
                                         <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                             {booking.schedule.is_recurring
                                                 ? `${booking.schedule.day_of_week} · ${booking.schedule.start_time}–${booking.schedule.end_time}`
-                                                : `${formatDate(booking.schedule.specific_date)} · ${booking.schedule.start_time}–${booking.schedule.end_time}`}
+                                                : `${formatDate(booking.schedule.specific_date ?? '')} · ${booking.schedule.start_time}–${booking.schedule.end_time}`}
                                         </p>
                                     </div>
                                     <div className="flex flex-col items-end gap-2">

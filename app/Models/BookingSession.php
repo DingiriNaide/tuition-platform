@@ -52,6 +52,11 @@ class BookingSession extends Model
         return $this->hasOne(AttendanceRecord::class);
     }
 
+    public function bookingSession(): BelongsTo
+    {
+        return $this->belongsTo(BookingSession::class);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────
 
     public function durationMinutes(): int

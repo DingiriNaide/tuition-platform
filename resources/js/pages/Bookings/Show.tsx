@@ -1,10 +1,11 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { cancel, confirm } from '@/actions/App/Http/Controllers/BookingController';
+import { cancel, confirm, show } from '@/actions/App/Http/Controllers/BookingController';
 import { bookingRoster } from '@/actions/App/Http/Controllers/AttendanceController';
 import { create as createReport } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { index as reportsIndex } from '@/actions/App/Http/Controllers/ProgressReportController';
+import { initiate as paymentsInitiate } from '@/actions/App/Http/Controllers/PaymentController';
 
 interface Session {
     id: number;
@@ -108,18 +109,49 @@ export default function BookingShow({ booking, dayOptions }: Props) {
             <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 
                 {/* ── Header ── */}
-                <div className="mb-6 flex items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {booking.course.title}
-                        </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Booking #{booking.id} · {booking.course.subject.name}
-                        </p>
+                <div className="mb-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                {booking.course.title}
+                            </h1>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Booking #{booking.id} · {booking.course.subject.name}
+                            </p>
+                        </div>
+                        <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold capitalize ${statusColors[booking.status] ?? ''}`}>
+                            {booking.status}
+                        </span>
                     </div>
-                    <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold capitalize ${statusColors[booking.status] ?? ''}`}>
-                        {booking.status}
-                    </span>
+
+                    {/* ── Payment Status Banners ── */}
+                    {auth.user.roles.includes('student') && booking.status === 'confirmed' && (booking.billing_type === 'per_session' ? Number(booking.amount_due) > 0 : true) > 0 && booking.payment_status !== 'paid' && (
+                        <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-semibold text-blue-900">Payment Required</p>
+                                    <p className="text-sm text-blue-700">
+                                        Amount Due: LKR {Number(booking.amount_due).toLocaleString('en-LK', {
+                                            minimumFractionDigits: 2
+                                        })}
+                                    </p>
+                                </div>
+                                <Link
+                                    href={paymentsInitiate.url(booking.id)}
+                                    className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 text-sm transition-colors"
+                                >
+                                    Pay with PayHere →
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+
+                    {auth.user.roles.includes('student') && booking.payment_status === 'paid' && (
+                        <div className="mt-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-5 py-3 text-green-800">
+                            <span className="text-lg">✅</span>
+                            <span className="font-semibold">Paid — No outstanding balance</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-3">
@@ -210,7 +242,7 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                     <dd className="font-medium text-gray-900 dark:text-white">
                                         {booking.schedule.is_recurring
                                             ? `${dayOptions[booking.schedule.day_of_week ?? ''] ?? booking.schedule.day_of_week}`
-                                            : formatDate(booking.schedule.specific_date)}
+                                            : formatDate(booking.schedule.specific_date ?? '')}
                                     </dd>
                                 </div>
                                 <div className="flex justify-between">

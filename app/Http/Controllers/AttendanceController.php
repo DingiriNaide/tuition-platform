@@ -64,7 +64,7 @@ class AttendanceController extends Controller
     {
         $tutorProfile = TutorProfile::where('user_id', Auth::id())->firstOrFail();
 
-        $bookingSession->load('booking.course.tutorProfile');
+        $bookingSession->load('booking.course.tutorProfile', 'booking.studentProfile');
 
         abort_unless(
             $bookingSession->booking->course->tutorProfile->id === $tutorProfile->id,
@@ -73,16 +73,30 @@ class AttendanceController extends Controller
 
         $validated = $request->validate([
             'status'       => ['required', 'in:present,absent,late,excused'],
-            'minutes_late' => ['required_if:status,late', 'nullable', 'integer', 'min:1', 'max:120'],
+            'minutes_late' => ['nullable', 'integer', 'min:0', 'max:120'],
             'tutor_notes'  => ['nullable', 'string', 'max:500'],
         ]);
 
+        if ($validated['status'] === 'late' && empty($validated['minutes_late'])) {
+            return back()->withErrors(['minutes_late' => 'Minutes late is required when status is late.']);
+        }
+
+        try {
         DB::transaction(function () use ($validated, $bookingSession, $tutorProfile): void {
+            $booking     = $bookingSession->booking;
+            $isAttended  = in_array($validated['status'], ['present', 'late'], true);
+
+            // Fetch existing record to detect status change
+            $existingRecord = AttendanceRecord::where('booking_session_id', $bookingSession->id)->first();
+            $wasAttended    = $existingRecord
+                ? in_array($existingRecord->status, ['present', 'late'], true)
+                : false;
+
             AttendanceRecord::updateOrCreate(
                 ['booking_session_id' => $bookingSession->id],
                 [
-                    'booking_id'         => $bookingSession->booking_id,
-                    'student_profile_id' => $bookingSession->booking->student_profile_id,
+                    'booking_id'         => $booking->id,
+                    'student_profile_id' => $booking->student_profile_id,
                     'tutor_profile_id'   => $tutorProfile->id,
                     'status'             => $validated['status'],
                     'minutes_late'       => $validated['minutes_late'] ?? 0,
@@ -91,12 +105,52 @@ class AttendanceController extends Controller
                 ]
             );
 
-            // Update session status and student_attended flag
             $bookingSession->update([
                 'status'           => 'completed',
-                'student_attended' => in_array($validated['status'], ['present', 'late'], true),
+                'student_attended' => $isAttended,
             ]);
+
+            // Only applies to per_session bookings
+            if ($booking->billing_type === 'per_session') {
+                $pricePerSession = (float) $booking->course->price_per_session;
+
+                if ($isAttended && ! $wasAttended) {
+                    // Newly marked present/late — create pending payment
+                    \App\Models\Payment::create([
+                        'booking_id'          => $booking->id,
+                        'booking_session_id'  => $bookingSession->id,
+                        'student_profile_id'  => $booking->student_profile_id,
+                        'amount'              => $pricePerSession,
+                        'currency'            => 'LKR',
+                        'status'              => 'pending',
+                    ]);
+
+                    $booking->increment('amount_due', $pricePerSession);
+
+                } elseif (! $isAttended && $wasAttended) {
+                    // Reversed — cancel the pending payment for this session
+                    $payment = \App\Models\Payment::where('booking_id', $booking->id)
+                        ->where('booking_session_id', $bookingSession->id)
+                        ->where('status', 'pending')
+                        ->first();
+
+                    if ($payment) {
+                        $payment->update(['status' => 'failed']);
+                        $booking->decrement('amount_due', $pricePerSession);
+                    }
+                }
+
+                $booking->fresh()->recalculatePaymentStatus();
+            }
+
+            \Log::info('price_per_session: ' . $booking->course->price_per_session);
+            \Log::info('isAttended: ' . ($isAttended ? 'true' : 'false'));
+            \Log::info('wasAttended: ' . ($wasAttended ? 'true' : 'false'));
         });
+        } catch (\Throwable $e) {
+            \Log::error('Attendance transaction failed: ' . $e->getMessage());
+            throw $e;
+        }
 
         return redirect()
             ->action([BookingController::class, 'show'], $bookingSession->booking_id)
