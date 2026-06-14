@@ -27,19 +27,47 @@ class DashboardController extends Controller
     {
         $profile = $user->studentProfile;
 
+        $pendingPaymentsCount  = 0;
+        $pendingPaymentsAmount = 0;
+
+        if ($profile) {
+            $pendingPaymentsCount  = \App\Models\Payment::where('student_profile_id', $profile->id)
+                ->where('status', 'pending')
+                ->count();
+
+            $pendingPaymentsAmount = \App\Models\Payment::where('student_profile_id', $profile->id)
+                ->where('status', 'pending')
+                ->sum('amount');
+        }
+
         return Inertia::render('Dashboard/Student', [
             'profile' => $profile,
             'stats'   => [
-                'upcoming_classes' => 0,
+                'upcoming_classes'  => 0,
                 'completed_classes' => 0,
-                'assignments_due' => 0,
+                'assignments_due'   => 0,
             ],
+            'pendingPaymentsCount'  => $pendingPaymentsCount,
+            'pendingPaymentsAmount' => $pendingPaymentsAmount,
         ]);
     }
 
     private function tutorDashboard($user): Response
     {
         $profile = $user->tutorProfile?->load('subjects');
+
+        $pendingPayouts = 0;
+        $totalEarnings  = 0;
+
+        if ($profile) {
+            $pendingPayouts = \App\Models\TutorPayout::where('tutor_profile_id', $profile->id)
+                ->where('status', 'pending')
+                ->sum('net_amount');
+
+            $totalEarnings = \App\Models\TutorPayout::where('tutor_profile_id', $profile->id)
+                ->where('status', 'paid')
+                ->sum('net_amount');
+        }
 
         return Inertia::render('Dashboard/Tutor', [
             'profile' => $profile,
@@ -49,6 +77,8 @@ class DashboardController extends Controller
                 'pending_reviews'  => 0,
                 'monthly_earnings' => 0,
             ],
+            'pendingPayouts' => $pendingPayouts,
+            'totalEarnings'  => $totalEarnings,
         ]);
     }
 

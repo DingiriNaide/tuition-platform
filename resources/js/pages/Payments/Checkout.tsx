@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm ,Link } from '@inertiajs/react';
 import { mockCheckout } from '@/actions/App/Http/Controllers/PaymentController';
+import { useState } from 'react';
 
 interface Props {
     booking: {
@@ -32,9 +33,16 @@ interface Props {
         phone: string;
         email: string;
     };
+    voucher: {
+        code: string;
+        discount_amount: number;
+        type: string;
+        value: number
+    } | null;
+    voucher_error: string | null;
 }
 
-export default function Checkout({ booking, payment, payhere, student }: Props) {
+export default function Checkout({ booking, payment, payhere, student, voucher, voucher_error }: Props) {
     const nameParts  = student.full_name.split(' ');
     const firstName  = nameParts[0] ?? '';
     const lastName   = nameParts.slice(1).join(' ') || '-';
@@ -64,6 +72,8 @@ export default function Checkout({ booking, payment, payhere, student }: Props) 
         // In live mode: submit to payhere.checkout_url instead
         post(mockCheckout.url());
     };
+
+    const [voucherCode, setVoucherCode] = useState('');
 
     return (
         <AppLayout>
@@ -157,6 +167,46 @@ export default function Checkout({ booking, payment, payhere, student }: Props) 
                             </div>
                         </div>
                     </div>
+
+                    <div className="mb-4">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Voucher / Scholarship Code
+                        </label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={voucherCode}
+                                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                                placeholder="Enter code"
+                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <Link
+                                href={`/bookings/${booking.id}/pay?voucher_code=${voucherCode}`}
+                                className="rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700
+                                        font-medium px-4 py-2 text-sm transition-colors"
+                            >
+                                Apply
+                            </Link>
+                        </div>
+                        {voucher_error && (
+                            <p className="mt-1 text-xs text-red-600">{voucher_error}</p>
+                        )}
+                        {voucher && (
+                            <p className="mt-1 text-xs text-green-600">
+                                ✓ {voucher.code} applied — LKR {Number(voucher.discount_amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })} off
+                            </p>
+                        )}
+                    </div>
+
+                    {voucher && (
+                        <div className="flex justify-between text-sm mb-2">
+                            <span className="text-gray-600">Discount</span>
+                            <span className="text-green-600 font-medium">
+                                − LKR {Number(voucher.discount_amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                            </span>
+                        </div>
+                    )}
 
                     {/* Submit */}
                     <div className="px-6 py-5">

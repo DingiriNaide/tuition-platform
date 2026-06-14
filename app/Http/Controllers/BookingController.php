@@ -183,6 +183,8 @@ class BookingController extends Controller
             'schedule',
             'studentProfile',
             'sessions' => fn ($q) => $q->orderBy('session_date')->orderBy('start_time'),
+            'sessions.attendanceRecord',
+            'sessions.liveSession',
         ]);
 
         return Inertia::render('Bookings/Show', [

@@ -1,7 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { show as bookingsShow } from '@/actions/App/Http/Controllers/BookingController';
 import { initiate as paymentsInitiate } from '@/actions/App/Http/Controllers/PaymentController';
+import { refund as paymentsRefund } from '@/actions/App/Http/Controllers/PaymentController';
 
 interface Payment {
     id: number;
@@ -49,6 +50,24 @@ const METHOD_LABELS: Record<string, string> = {
     mcash:         '📱 mCash',
     other:         '💰 Other',
 };
+
+function RefundButton({ paymentId }: { paymentId: number }) {
+    const { post, processing } = useForm({});
+
+    return (
+        <button
+            onClick={() => {
+                if (confirm('Are you sure you want to request a refund?')) {
+                    post(paymentsRefund.url(paymentId));
+                }
+            }}
+            disabled={processing}
+            className="text-xs text-red-600 hover:underline disabled:opacity-50"
+        >
+            {processing ? 'Processing...' : 'Refund'}
+        </button>
+    );
+}
 
 export default function Index({ payments }: Props) {
     return (
@@ -112,19 +131,18 @@ export default function Index({ payments }: Props) {
                                         </p>
                                     )}
                                     <div className="flex gap-2">
-                                        <Link
-                                            href={bookingsShow.url(payment.booking_id)}
-                                            className="text-xs text-blue-600 hover:underline"
-                                        >
+                                        <Link href={bookingsShow.url(payment.booking_id)}
+                                            className="text-xs text-blue-600 hover:underline">
                                             View Booking
                                         </Link>
                                         {payment.status === 'pending' && (
-                                            <Link
-                                                href={paymentsInitiate.url(payment.booking_id)}
-                                                className="text-xs text-green-600 hover:underline font-semibold"
-                                            >
+                                            <Link href={paymentsInitiate.url(payment.booking_id)}
+                                                className="text-xs text-green-600 hover:underline font-semibold">
                                                 Pay Now
                                             </Link>
+                                        )}
+                                        {payment.status === 'completed' && (
+                                            <RefundButton paymentId={payment.id} />
                                         )}
                                     </div>
                                 </div>

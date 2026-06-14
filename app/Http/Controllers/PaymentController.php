@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\TutorPayout;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
@@ -21,7 +22,7 @@ class PaymentController extends Controller
     /**
      * Show the payment initiation page for a confirmed booking.
      */
-    public function initiate(Booking $booking): Response|RedirectResponse
+    public function initiate(Request $request, Booking $booking): Response|RedirectResponse
     {
         $user           = Auth::user();
         $studentProfile = $user->studentProfile;
@@ -38,30 +39,77 @@ class PaymentController extends Controller
             return redirect()->back()->with('info', 'This booking is already paid.');
         }
 
-        $booking->load(['course.subject', 'schedule', 'latestPayment']);
-
-        // Generate a fresh pending payment record (or reuse existing pending)
-        $payment = $booking->payments()->where('status', 'pending')->first();
-
-        if (! $payment) {
-            $payment = DB::transaction(function () use ($booking, $studentProfile): Payment {
-                $p                   = new Payment();
-                $p->booking_id       = $booking->id;
-                $p->student_profile_id = $studentProfile->id;
-                $p->amount           = $booking->amount_due;
-                $p->currency         = 'LKR';
-                $p->status           = 'pending';
-                $p->save();
-                $p->payhere_order_id = $p->generateOrderId();
-                $p->save();
-                return $p;
-            });
+        if ($booking->billing_type === 'per_session' && $booking->amount_due <= 0) {
+            return redirect()->back()->with('info', 'No outstanding balance — attend a session first.');
         }
 
-        // Build PayHere hash: MD5(merchant_id + order_id + amount + currency + MD5(secret))
-        $merchantId     = config('payhere.merchant_id');
-        $merchantSecret = config('payhere.merchant_secret');
-        $hashedSecret   = strtoupper(md5($merchantSecret));
+        $booking->load(['course.subject', 'schedule', 'latestPayment']);
+
+        // ── Voucher ───────────────────────────────────────────────────────────────
+        $voucherCode  = $request->input('voucher_code');
+        $voucher      = null;
+        $discount     = 0;
+        $voucherError = null;
+
+        if ($voucherCode) {
+            $voucher = \App\Models\Voucher::where('code', strtoupper($voucherCode))->first();
+
+            if (! $voucher || ! $voucher->isValid($studentProfile)) {
+                $voucherError = 'Invalid or expired voucher code.';
+                $voucher      = null;
+            } else {
+                $discount = $voucher->discountFor((float) $booking->amount_due);
+            }
+        }
+
+        $finalAmount = max(0, (float) $booking->amount_due - $discount);
+
+        // ── Payment record ────────────────────────────────────────────────────────
+        if ($booking->billing_type === 'per_session') {
+            // Assign a shared batch order ID to all pending session payments
+            $pendingPayments = $booking->payments()->where('status', 'pending')->get();
+            $batchOrderId    = 'TP-' . strtoupper(uniqid()) . '-' . $booking->id;
+            $pendingPayments->each(fn ($p) => $p->update(['payhere_order_id' => $batchOrderId]));
+
+            // Use a virtual payment object for the checkout page
+            $payment = (object) [
+                'id'               => null,
+                'payhere_order_id' => $batchOrderId,
+                'amount'           => $finalAmount ?: $pendingPayments->sum('amount'),
+                'currency'         => 'LKR',
+                'status'           => 'pending',
+            ];
+        } else {
+            // Monthly — reuse existing pending or create new
+            $payment = $booking->payments()->where('status', 'pending')->first();
+
+            if (! $payment) {
+                $payment = DB::transaction(function () use ($booking, $studentProfile, $finalAmount, $voucher, $discount): Payment {
+                    $p                     = new Payment();
+                    $p->booking_id         = $booking->id;
+                    $p->student_profile_id = $studentProfile->id;
+                    $p->amount             = $finalAmount;
+                    $p->currency           = 'LKR';
+                    $p->status             = 'pending';
+                    $p->voucher_id         = $voucher?->id;
+                    $p->discount_amount    = $discount;
+                    $p->save();
+                    $p->payhere_order_id   = $p->generateOrderId();
+                    $p->save();
+
+                    if ($voucher) {
+                        $voucher->increment('times_used');
+                    }
+
+                    return $p;
+                });
+            }
+        }
+
+        // ── Hash ──────────────────────────────────────────────────────────────────
+        $merchantId      = config('payhere.merchant_id');
+        $merchantSecret  = config('payhere.merchant_secret');
+        $hashedSecret    = strtoupper(md5($merchantSecret));
         $amountFormatted = number_format((float) $payment->amount, 2, '.', '');
         $hash = strtoupper(
             md5($merchantId . $payment->payhere_order_id . $amountFormatted . $payment->currency . $hashedSecret)
@@ -77,11 +125,11 @@ class PaymentController extends Controller
                 'payment_status' => $booking->payment_status,
             ],
             'payment' => [
-                'id'              => $payment->id,
-                'order_id'        => $payment->payhere_order_id,
-                'amount'          => $payment->amount,
-                'currency'        => $payment->currency,
-                'status'          => $payment->status,
+                'id'       => $payment->id,
+                'order_id' => $payment->payhere_order_id,
+                'amount'   => $payment->amount,
+                'currency' => $payment->currency,
+                'status'   => $payment->status,
             ],
             'payhere' => [
                 'merchant_id'  => $merchantId,
@@ -99,6 +147,13 @@ class PaymentController extends Controller
                 'phone'     => $studentProfile->phone,
                 'email'     => $user->email,
             ],
+            'voucher' => $voucher ? [
+                'code'            => $voucher->code,
+                'discount_amount' => $discount,
+                'type'            => $voucher->type,
+                'value'           => $voucher->value,
+            ] : null,
+            'voucher_error' => $voucherError,
         ]);
     }
 
@@ -137,28 +192,27 @@ class PaymentController extends Controller
      */
     public function mockSuccess(Request $request): RedirectResponse
     {
-        $orderId = $request->input('order_id');
-        $payment = Payment::where('payhere_order_id', $orderId)->firstOrFail();
+        $orderId  = $request->input('order_id');
+        $payments = Payment::where('payhere_order_id', $orderId)->get();
+        $totalAmount = $payments->sum('amount');
 
-        // Simulate webhook call to ourselves
         $simulatedPayload = [
-            'merchant_id'    => config('payhere.merchant_id'),
-            'order_id'       => $orderId,
-            'payment_id'     => 'MOCK-' . strtoupper(uniqid()),
-            'payhere_amount' => number_format((float) $payment->amount, 2, '.', ''),
-            'payhere_currency' => $payment->currency,
-            'status_code'    => '2',  // 2 = Success in PayHere
-            'status_message' => 'Successfully completed',
-            'method'         => $request->input('method', 'VISA'),
+            'merchant_id'      => config('payhere.merchant_id'),
+            'order_id'         => $orderId,
+            'payment_id'       => 'MOCK-' . strtoupper(uniqid()),
+            'payhere_amount'   => number_format((float) $totalAmount, 2, '.', ''),
+            'payhere_currency' => 'LKR',
+            'status_code'      => '2',
+            'status_message'   => 'Successfully completed',
+            'method'           => $request->input('method', 'VISA'),
             'card_holder_name' => $request->input('card_holder_name', 'Mock User'),
-            'card_no'        => '************1234',
-            'card_expiry'    => '12/26',
-            'md5sig'         => $this->generateMd5Sig(
+            'card_no'          => '************1234',
+            'card_expiry'      => '12/26',
+            'md5sig'           => $this->generateMd5Sig(
                 config('payhere.merchant_id'),
                 $orderId,
-                number_format((float) $payment->amount, 2, '.', ''),
-                $payment->currency,
-                '2',
+                number_format((float) $totalAmount, 2, '.', ''),
+                'LKR', '2',
                 config('payhere.merchant_secret')
             ),
         ];
@@ -168,29 +222,26 @@ class PaymentController extends Controller
         return redirect()->route('payments.return', ['order_id' => $orderId]);
     }
 
-    /**
-     * Mock: simulate a failed/cancelled payment.
-     */
     public function mockFail(Request $request): RedirectResponse
     {
-        $orderId = $request->input('order_id');
-        $payment = Payment::where('payhere_order_id', $orderId)->firstOrFail();
+        $orderId     = $request->input('order_id');
+        $payments    = Payment::where('payhere_order_id', $orderId)->get();
+        $totalAmount = $payments->sum('amount');
 
         $simulatedPayload = [
             'merchant_id'      => config('payhere.merchant_id'),
             'order_id'         => $orderId,
             'payment_id'       => 'MOCK-FAIL-' . strtoupper(uniqid()),
-            'payhere_amount'   => number_format((float) $payment->amount, 2, '.', ''),
-            'payhere_currency' => $payment->currency,
-            'status_code'      => '-2', // -2 = Failed
+            'payhere_amount'   => number_format((float) $totalAmount, 2, '.', ''),
+            'payhere_currency' => 'LKR',
+            'status_code'      => '-2',
             'status_message'   => 'Payment failed (mock)',
             'method'           => 'VISA',
             'md5sig'           => $this->generateMd5Sig(
                 config('payhere.merchant_id'),
                 $orderId,
-                number_format((float) $payment->amount, 2, '.', ''),
-                $payment->currency,
-                '-2',
+                number_format((float) $totalAmount, 2, '.', ''),
+                'LKR', '-2',
                 config('payhere.merchant_secret')
             ),
         ];
@@ -290,6 +341,34 @@ class PaymentController extends Controller
         ]);
     }
 
+    public function refund(Payment $payment): RedirectResponse
+    {
+        $studentProfile = Auth::user()->studentProfile;
+
+        // Only admin or the student who owns the payment
+        $isAdmin   = Auth::user()->hasAnyRole(['admin', 'super-admin']);
+        $isOwner   = $studentProfile && $payment->student_profile_id === $studentProfile->id;
+
+        abort_unless($isAdmin || $isOwner, 403);
+        abort_unless($payment->status === 'completed', 422);
+
+        DB::transaction(function () use ($payment): void {
+            $payment->update(['status' => 'refunded']);
+
+            $booking = $payment->booking;
+            $booking->decrement('amount_paid', $payment->amount);
+
+            // For per_session, also decrement amount_due
+            if ($booking->billing_type === 'per_session') {
+                $booking->decrement('amount_due', $payment->amount);
+            }
+
+            $booking->fresh()->recalculatePaymentStatus();
+        });
+
+        return redirect()->back()->with('success', 'Payment refunded successfully.');
+    }
+
     // ─── Private Helpers ─────────────────────────────────────────────────────
 
     private function generateMd5Sig(
@@ -311,42 +390,30 @@ class PaymentController extends Controller
         $orderId    = $payload['order_id'];
         $statusCode = (int) ($payload['status_code'] ?? 0);
 
-        $payment = Payment::where('payhere_order_id', $orderId)->first();
+        $payments = Payment::where('payhere_order_id', $orderId)->get();
 
-        if (! $payment) {
+        if ($payments->isEmpty()) {
             Log::error('PayHere webhook: payment not found', ['order_id' => $orderId]);
             return;
         }
 
-        DB::transaction(function () use ($payment, $payload, $statusCode): void {
-            $methodMap = [
-                'VISA'        => 'card',
-                'MASTER'      => 'card',
-                'AMEX'        => 'card',
-                'EZCASH'      => 'ezcash',
-                'MCASH'       => 'mcash',
-                'GENIE'       => 'other',
-                'BANK'        => 'bank_transfer',
-                'OTHER'       => 'other',
-            ];
+        $methodMap = [
+            'VISA'   => 'card',  'MASTER' => 'card',
+            'AMEX'   => 'card',  'EZCASH' => 'ezcash',
+            'MCASH'  => 'mcash', 'GENIE'  => 'other',
+            'BANK'   => 'bank_transfer', 'OTHER' => 'other',
+        ];
 
-            $rawMethod = strtoupper($payload['method'] ?? 'OTHER');
-            $method    = $methodMap[$rawMethod] ?? 'other';
+        $method = $methodMap[strtoupper($payload['method'] ?? 'OTHER')] ?? 'other';
 
-            $payment->gateway_response = $payload;
-
-            // PayHere status codes:
-            // 2  = Success
-            // 0  = Pending
-            // -1 = Cancelled
-            // -2 = Failed
-            // -3 = Chargedback
-
-            match ($statusCode) {
-                2 => $this->markPaymentCompleted($payment, $payload, $method),
-                0 => $payment->update(['status' => 'pending', 'method' => $method, 'gateway_response' => $payload]),
-                default => $payment->update(['status' => 'failed', 'method' => $method, 'gateway_response' => $payload]),
-            };
+        DB::transaction(function () use ($payments, $payload, $statusCode, $method): void {
+            foreach ($payments as $payment) {
+                match ($statusCode) {
+                    2       => $this->markPaymentCompleted($payment, $payload, $method),
+                    0       => $payment->update(['status' => 'pending',  'method' => $method, 'gateway_response' => $payload]),
+                    default => $payment->update(['status' => 'failed',   'method' => $method, 'gateway_response' => $payload]),
+                };
+            }
         });
     }
 
@@ -362,17 +429,31 @@ class PaymentController extends Controller
             'paid_at'            => $now,
         ]);
 
-        // Update the booking's payment_status and amount_paid
-        $booking = $payment->booking;
-        $booking->update([
-            'payment_status' => 'paid',
-            'amount_paid'    => $payment->amount,
+        $booking = $payment->booking()->with('course.tutorProfile')->first();
+        $booking->increment('amount_paid', $payment->amount);
+        $booking->fresh()->recalculatePaymentStatus();
+
+        // Create tutor payout record
+        $commissionRate   = (float) env('PLATFORM_COMMISSION_RATE', 10);
+        $commissionAmount = round($payment->amount * $commissionRate / 100, 2);
+        $netAmount        = round($payment->amount - $commissionAmount, 2);
+
+        $tutorProfileId = $booking->course->tutorProfile->id;
+
+        TutorPayout::create([
+            'tutor_profile_id'  => $tutorProfileId,
+            'payment_id'        => $payment->id,
+            'gross_amount'      => $payment->amount,
+            'commission_rate'   => $commissionRate,
+            'commission_amount' => $commissionAmount,
+            'net_amount'        => $netAmount,
+            'status'            => 'pending',
         ]);
 
-        Log::info('Payment completed', [
+        Log::info('Payment completed + payout created', [
             'order_id'   => $payment->payhere_order_id,
             'booking_id' => $booking->id,
-            'amount'     => $payment->amount,
+            'net_amount' => $netAmount,
         ]);
     }
 }

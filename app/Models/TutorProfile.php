@@ -48,4 +48,9 @@ class TutorProfile extends Model
     {
         return $this->hasMany(ProgressReport::class);
     }
+
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(TutorPayout::class);
+    }
 }

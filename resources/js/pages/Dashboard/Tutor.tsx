@@ -31,9 +31,11 @@ interface Stats {
 interface Props {
     profile: TutorProfile | null;
     stats: Stats;
+    pendingPayouts: number;
+    totalEarnings: number;
 }
 
-export default function TutorDashboard({ profile, stats }: Props) {
+export default function TutorDashboard({ profile, stats, pendingPayouts, totalEarnings }: Props) {
     return (
         <AppLayout>
             <Head title="Tutor Dashboard" />
@@ -138,22 +140,6 @@ export default function TutorDashboard({ profile, stats }: Props) {
                 <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
                     <h2 className="font-medium mb-3">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3">
-                        {/* <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <p className="font-medium text-sm">Create Course</p>
-                            <p className="text-xs text-gray-500 mt-1">List a new course for students</p>
-                        </button>
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <p className="font-medium text-sm">Schedule Class</p>
-                            <p className="text-xs text-gray-500 mt-1">Set up an upcoming session</p>
-                        </button>
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <p className="font-medium text-sm">View Assignments</p>
-                            <p className="text-xs text-gray-500 mt-1">Review student submissions</p>
-                        </button>
-                        <button className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <p className="font-medium text-sm">Earnings Report</p>
-                            <p className="text-xs text-gray-500 mt-1">View your payment history</p>
-                        </button> */}
                         <Link
                             href="/courses/create"
                             className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
@@ -196,6 +182,20 @@ export default function TutorDashboard({ profile, stats }: Props) {
                             Create new course
                         </Link>
                     </div>
+                </div>
+
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+                    <p className="text-sm text-amber-700">Pending Payouts</p>
+                    <p className="text-2xl font-bold text-amber-900">
+                        LKR {Number(pendingPayouts).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                    </p>
+                </div>
+
+                <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4">
+                    <p className="text-sm text-green-700">Total Earnings</p>
+                    <p className="text-2xl font-bold text-green-900">
+                        LKR {Number(totalEarnings).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                    </p>
                 </div>
 
             </div>

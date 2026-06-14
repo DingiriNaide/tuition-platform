@@ -25,10 +25,13 @@ class Payment extends Model
         'method',
         'gateway_response',
         'paid_at',
+        'voucher_id',
+        'discount_amount',
     ];
 
     protected $casts = [
         'amount'           => 'decimal:2',
+        'discount_amount'  => 'decimal:2',
         'gateway_response' => 'array',
         'paid_at'          => 'datetime',
     ];

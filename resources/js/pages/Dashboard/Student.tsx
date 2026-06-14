@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/StudentProfileController';
+import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
 
 interface StudentProfile {
     id: number;
@@ -20,9 +21,11 @@ interface Stats {
 interface Props {
     profile: StudentProfile | null;
     stats: Stats;
+    pendingPaymentsCount: number;
+    pendingPaymentsAmount: number;
 }
 
-export default function StudentDashboard({ profile, stats }: Props) {
+export default function StudentDashboard({ profile, stats, pendingPaymentsCount, pendingPaymentsAmount }: Props) {
     return (
         <AppLayout>
             <Head title="Student Dashboard" />
@@ -115,6 +118,24 @@ export default function StudentDashboard({ profile, stats }: Props) {
                         </button>
                     </div>
                 </div>
+
+                {pendingPaymentsCount > 0 && (
+                    <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between">
+                        <div>
+                            <p className="font-semibold text-amber-900">Outstanding Payments</p>
+                            <p className="text-sm text-amber-700">
+                                {pendingPaymentsCount} session{pendingPaymentsCount > 1 ? 's' : ''} attended —
+                                LKR {Number(pendingPaymentsAmount).toLocaleString('en-LK', { minimumFractionDigits: 2 })} due
+                            </p>
+                        </div>
+                        <Link
+                            href={paymentsIndex.url()}
+                            className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 text-sm transition-colors"
+                        >
+                            Pay Now
+                        </Link>
+                    </div>
+                )}
 
             </div>
         </AppLayout>

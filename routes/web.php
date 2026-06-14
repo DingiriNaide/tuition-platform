@@ -11,6 +11,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ProgressReportController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\LiveSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -169,11 +170,37 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::get('/my-payments', [PaymentController::class, 'index'])
         ->name('payments.index');
+
+    Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund'])
+        ->name('payments.refund')
+        ->middleware('role:admin|super-admin|student');
 });
 
 // Webhook — NO auth, NO CSRF (PayHere posts server-to-server)
 Route::post('/payments/webhook/payhere', [PaymentController::class, 'webhook'])
     ->name('payments.webhook')
     ->withoutMiddleware(['web', \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+// Tutor: create room from a booking session
+Route::middleware(['auth', 'verified', 'role:tutor|admin|super-admin'])->group(function (): void {
+    Route::post('/live-sessions', [LiveSessionController::class, 'store'])
+         ->name('live-sessions.store');
+    Route::post('/live-sessions/{liveSession}/start', [LiveSessionController::class, 'start'])
+         ->name('live-sessions.start');
+    Route::post('/live-sessions/{liveSession}/end', [LiveSessionController::class, 'end'])
+         ->name('live-sessions.end');
+});
+
+// Shared: room view + signalling (tutor + student)
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/live-sessions/{liveSession}', [LiveSessionController::class, 'show'])
+         ->name('live-sessions.show');
+    Route::post('/live-sessions/{liveSession}/signal', [LiveSessionController::class, 'signal'])
+         ->name('live-sessions.signal');
+    Route::post('/live-sessions/{liveSession}/chat', [LiveSessionController::class, 'chat'])
+         ->name('live-sessions.chat');
+    Route::post('/live-sessions/{liveSession}/hand', [LiveSessionController::class, 'hand'])
+         ->name('live-sessions.hand');
+});
 
 require __DIR__.'/settings.php';

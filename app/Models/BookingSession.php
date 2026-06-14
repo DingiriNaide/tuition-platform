@@ -57,6 +57,11 @@ class BookingSession extends Model
         return $this->belongsTo(BookingSession::class);
     }
 
+    public function liveSession(): HasOne
+    {
+        return $this->hasOne(LiveSession::class);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────
 
     public function durationMinutes(): int

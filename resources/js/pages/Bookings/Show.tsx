@@ -6,6 +6,8 @@ import { bookingRoster } from '@/actions/App/Http/Controllers/AttendanceControll
 import { create as createReport } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { index as reportsIndex } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { initiate as paymentsInitiate } from '@/actions/App/Http/Controllers/PaymentController';
+import { store as createLiveSession } from '@/actions/App/Http/Controllers/LiveSessionController';
+import { show as showLiveSession } from '@/actions/App/Http/Controllers/LiveSessionController';
 
 interface Session {
     id: number;
@@ -15,6 +17,7 @@ interface Session {
     status: string;
     student_attended: boolean;
     tutor_notes: string | null;
+    live_session: { id: number; status: string } | null;
 }
 
 interface Booking {
@@ -125,15 +128,13 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                     </div>
 
                     {/* ── Payment Status Banners ── */}
-                    {auth.user.roles.includes('student') && booking.status === 'confirmed' && (booking.billing_type === 'per_session' ? Number(booking.amount_due) > 0 : true) > 0 && booking.payment_status !== 'paid' && (
+                    {auth.user.roles.includes('student') && booking.status === 'confirmed' && booking.payment_status !== 'paid' && (
                         <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="font-semibold text-blue-900">Payment Required</p>
                                     <p className="text-sm text-blue-700">
-                                        Amount Due: LKR {Number(booking.amount_due).toLocaleString('en-LK', {
-                                            minimumFractionDigits: 2
-                                        })}
+                                        Amount Due: LKR {Number(booking.amount_due - booking.amount_paid).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
                                     </p>
                                 </div>
                                 <Link
@@ -313,6 +314,36 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                 >
                                     View Attendance
                                 </Link>
+
+                                {isTutor && booking.status === 'confirmed' && (
+                                    <button
+                                        onClick={() => {
+                                            router.post(createLiveSession.url(), {
+                                                booking_id: booking.id,
+                                            });
+                                        }}
+                                        className="block w-full rounded-md bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-500"
+                                    >
+                                        ▶ Start Live Session
+                                    </button>
+                                )}
+
+                                {isStudent && (
+                                    <>
+                                        {booking.sessions
+                                            .filter(s => s.live_session && ['waiting', 'live'].includes(s.live_session.status))
+                                            .slice(0, 1)
+                                            .map(s => (
+                                                <Link
+                                                    key={s.id}
+                                                    href={showLiveSession.url(s.live_session!.id)}
+                                                    className="block w-full rounded-md bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-500"
+                                                >
+                                                    {s.live_session!.status === 'live' ? '▶ Join Live Session' : '⏳ Session Starting Soon'}
+                                                </Link>
+                                            ))}
+                                    </>
+                                )}
 
                                 {/* Progress report actions — tutor only */}
                                 {isTutor && (
