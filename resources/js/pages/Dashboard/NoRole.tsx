@@ -1,9 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 
 export default function NoRole() {
     return (
-        <AppLayout>
+        <>
             <Head title="Get Started" />
             <div className="max-w-2xl mx-auto p-6 text-center space-y-6">
                 <h1 className="text-2xl font-semibold">Welcome to the Platform</h1>
@@ -39,6 +38,6 @@ export default function NoRole() {
                     </Link>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

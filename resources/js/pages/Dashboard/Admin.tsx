@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 
 interface Stats {
     total_students: number;
@@ -14,7 +13,7 @@ interface Props {
 
 export default function AdminDashboard({ stats }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Admin Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
@@ -77,6 +76,6 @@ export default function AdminDashboard({ stats }: Props) {
                 </div>
 
             </div>
-        </AppLayout>
+        </>
     );
 }

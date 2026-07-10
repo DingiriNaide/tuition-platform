@@ -61,6 +61,14 @@ const statusBadge: Record<string, string> = {
     excused: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
+function formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('en-LK', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
 export default function StudentAttendanceSummary({
     records,
     courseSummary,
@@ -174,7 +182,7 @@ export default function StudentAttendanceSummary({
                                             className="hover:bg-gray-50 dark:hover:bg-gray-700/30"
                                         >
                                             <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
-                                                {record.booking_session.session_date}
+                                                {formatDate(record.booking_session.session_date)}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <p className="text-sm text-gray-900 dark:text-white">

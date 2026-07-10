@@ -1,73 +1,63 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, CalendarDays, UserCheck, UserCircle } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    LayoutGrid, BookOpen, CalendarDays, CheckSquare,
+    BarChart2, CreditCard, GraduationCap, Users,
+    ShieldCheck, Ticket, FileText, DollarSign
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
+    Sidebar, SidebarContent, SidebarFooter,
+    SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Courses',
-        href: '/courses',
-        icon: BookOpen,
-    },
-    {
-        title: 'Bookings',
-        href: '/bookings',
-        icon: CalendarDays,
-    },
-    {
-        title: 'Tutor Bookings',
-        href: 'tutor/bookings',
-        icon: CalendarDays,
-    },
-    {
-        title: 'Schedules',
-        href: '/schedules',
-        icon: CalendarDays,
-    },
-    {
-        title: 'Progress',
-        href: '/my-progress',
-        icon: UserCheck,
-    },
-    {
-        title: 'Payments',
-        href: '/my-payments',
-        icon: UserCircle,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { auth } = usePage().props as any;
+    const roles: string[] = auth?.user?.roles ?? [];
+
+    const isStudent  = roles.includes('student');
+    const isTutor    = roles.includes('tutor');
+    const isAdmin    = roles.includes('admin') || roles.includes('super-admin');
+    const isParent   = roles.includes('parent');
+
+    const studentNav: NavItem[] = [
+        { title: 'Dashboard',        href: dashboard(),      icon: LayoutGrid   },
+        { title: 'Browse Courses',   href: '/courses',       icon: BookOpen     },
+        { title: 'My Bookings',      href: '/bookings',      icon: CalendarDays },
+        { title: 'Attendance',       href: '/attendance',    icon: CheckSquare  },
+        { title: 'Progress Reports', href: '/my-progress',   icon: BarChart2    },
+        { title: 'Payments',         href: '/my-payments',   icon: CreditCard   },
+    ];
+
+    const tutorNav: NavItem[] = [
+        { title: 'Dashboard',        href: dashboard(),          icon: LayoutGrid   },
+        { title: 'My Courses',       href: '/courses',           icon: BookOpen     },
+        { title: 'Bookings',         href: '/tutor/bookings',    icon: CalendarDays },
+        { title: 'Schedules',        href: '/schedules',         icon: CalendarDays },
+        { title: 'Progress Reports', href: '/progress-reports',  icon: FileText     },
+        { title: 'Earnings',         href: '/my-payments',       icon: DollarSign   },
+    ];
+
+    const adminNav: NavItem[] = [
+        { title: 'Dashboard',          href: dashboard(),           icon: LayoutGrid  },
+        { title: 'Tutor Verification', href: '/admin/tutors',       icon: ShieldCheck },
+        { title: 'Vouchers',           href: '/admin/vouchers',     icon: Ticket      },
+        { title: 'Courses',            href: '/courses',            icon: BookOpen    },
+    ];
+
+    const parentNav: NavItem[] = [
+        { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    ];
+
+    const navItems = isAdmin ? adminNav
+        : isTutor   ? tutorNav
+        : isStudent  ? studentNav
+        : isParent   ? parentNav
+        : [{ title: 'Dashboard', href: dashboard(), icon: LayoutGrid }];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -83,11 +73,10 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ProfileController\StudentProfileController;
 use App\Http\Controllers\ProfileController\TutorProfileController;
 use App\Http\Controllers\ProfileController\ParentProfileController;
@@ -12,11 +13,10 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ProgressReportController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\LiveSessionController;
+use App\Http\Controllers\Admin\VoucherController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return Inertia\Inertia::render('welcome');
-})->name('home');
+Route::get('/', [LandingController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -201,6 +201,14 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
          ->name('live-sessions.chat');
     Route::post('/live-sessions/{liveSession}/hand', [LiveSessionController::class, 'hand'])
          ->name('live-sessions.hand');
+});
+
+// Admin: voucher management
+Route::middleware(['auth', 'verified', 'role:admin|super-admin'])->group(function (): void {
+    Route::get('/admin/vouchers', [VoucherController::class, 'index'])->name('admin.vouchers.index');
+    Route::post('/admin/vouchers', [VoucherController::class, 'store'])->name('admin.vouchers.store');
+    Route::post('/admin/vouchers/{voucher}/toggle', [VoucherController::class, 'toggle'])->name('admin.vouchers.toggle');
+    Route::delete('/admin/vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
 });
 
 require __DIR__.'/settings.php';

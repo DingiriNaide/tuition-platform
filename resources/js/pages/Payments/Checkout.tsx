@@ -40,9 +40,10 @@ interface Props {
         value: number
     } | null;
     voucher_error: string | null;
+    available_vouchers: { code: string; type: string; value: string; is_low_income_only: boolean }[];
 }
 
-export default function Checkout({ booking, payment, payhere, student, voucher, voucher_error }: Props) {
+export default function Checkout({ booking, payment, payhere, student, voucher, voucher_error, available_vouchers }: Props) {
     const nameParts  = student.full_name.split(' ');
     const firstName  = nameParts[0] ?? '';
     const lastName   = nameParts.slice(1).join(' ') || '-';
@@ -105,108 +106,131 @@ export default function Checkout({ booking, payment, payhere, student, voucher, 
                         </div>
                     </div>
 
-                    {/* Order Summary */}
-                    <div className="px-6 py-5 border-b border-gray-100">
-                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                            Order Summary
-                        </h2>
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Course</span>
-                                <span className="font-medium text-gray-900 text-right max-w-[60%]">
-                                    {booking.course_title}
+                    <div className="p-4">
+                        {/* Order Summary */}
+                        <div className="px-6 py-5 border-b border-gray-100">
+                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                                Order Summary
+                            </h2>
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Course</span>
+                                    <span className="font-medium text-gray-900 text-right max-w-[60%]">
+                                        {booking.course_title}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Subject</span>
+                                    <span className="font-medium text-gray-900">{booking.subject_name}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Billing</span>
+                                    <span className="font-medium text-gray-900 capitalize">
+                                        {booking.billing_type.replace('_', ' ')}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Order ID</span>
+                                    <span className="font-mono text-xs text-gray-500">{payment.order_id}</span>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-baseline">
+                                <span className="text-gray-700 font-medium">Total Due</span>
+                                <span className="text-2xl font-bold text-blue-600">
+                                    {payment.currency} {Number(payment.amount).toLocaleString('en-LK', {
+                                        minimumFractionDigits: 2
+                                    })}
                                 </span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Subject</span>
-                                <span className="font-medium text-gray-900">{booking.subject_name}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Billing</span>
-                                <span className="font-medium text-gray-900 capitalize">
-                                    {booking.billing_type.replace('_', ' ')}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Order ID</span>
-                                <span className="font-mono text-xs text-gray-500">{payment.order_id}</span>
+                        </div>
+
+                        {/* Customer Info */}
+                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                                Billing Details
+                            </h2>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span className="text-gray-500">Name</span>
+                                    <p className="font-medium text-gray-800">{student.full_name}</p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-500">Email</span>
+                                    <p className="font-medium text-gray-800">{student.email}</p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-500">Phone</span>
+                                    <p className="font-medium text-gray-800">{student.phone}</p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-500">Country</span>
+                                    <p className="font-medium text-gray-800">Sri Lanka</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-baseline">
-                            <span className="text-gray-700 font-medium">Total Due</span>
-                            <span className="text-2xl font-bold text-blue-600">
-                                {payment.currency} {Number(payment.amount).toLocaleString('en-LK', {
-                                    minimumFractionDigits: 2
-                                })}
-                            </span>
+                        <div className="mb-4">
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Voucher / Scholarship Code
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={voucherCode}
+                                    onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                                    placeholder="Enter code"
+                                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-black
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <Link
+                                    href={`/bookings/${booking.id}/pay?voucher_code=${voucherCode}`}
+                                    className="rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700
+                                            font-medium px-4 py-2 text-sm transition-colors"
+                                >
+                                    Apply
+                                </Link>
+                            </div>
+                            {voucher_error && (
+                                <p className="mt-1 text-xs text-red-600">{voucher_error}</p>
+                            )}
+                            {voucher && (
+                                <p className="mt-1 text-xs text-green-600">
+                                    ✓ {voucher.code} applied — LKR {Number(voucher.discount_amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })} off
+                                </p>
+                            )}
                         </div>
-                    </div>
 
-                    {/* Customer Info */}
-                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                            Billing Details
-                        </h2>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                                <span className="text-gray-500">Name</span>
-                                <p className="font-medium text-gray-800">{student.full_name}</p>
-                            </div>
-                            <div>
-                                <span className="text-gray-500">Email</span>
-                                <p className="font-medium text-gray-800">{student.email}</p>
-                            </div>
-                            <div>
-                                <span className="text-gray-500">Phone</span>
-                                <p className="font-medium text-gray-800">{student.phone}</p>
-                            </div>
-                            <div>
-                                <span className="text-gray-500">Country</span>
-                                <p className="font-medium text-gray-800">Sri Lanka</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Voucher / Scholarship Code
-                        </label>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={voucherCode}
-                                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                                placeholder="Enter code"
-                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <Link
-                                href={`/bookings/${booking.id}/pay?voucher_code=${voucherCode}`}
-                                className="rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700
-                                        font-medium px-4 py-2 text-sm transition-colors"
-                            >
-                                Apply
-                            </Link>
-                        </div>
-                        {voucher_error && (
-                            <p className="mt-1 text-xs text-red-600">{voucher_error}</p>
-                        )}
                         {voucher && (
-                            <p className="mt-1 text-xs text-green-600">
-                                ✓ {voucher.code} applied — LKR {Number(voucher.discount_amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })} off
-                            </p>
+                            <div className="flex justify-between text-sm mb-2">
+                                <span className="text-gray-600">Discount</span>
+                                <span className="text-green-600 font-medium">
+                                    − LKR {Number(voucher.discount_amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                                </span>
+                            </div>
+                        )}
+
+                        {available_vouchers.length > 0 && (
+                            <div className="mt-2">
+                                <p className="text-xs text-gray-500 mb-1">Available vouchers:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {available_vouchers.map((v) => (
+                                        <button
+                                            key={v.code}
+                                            type="button"
+                                            onClick={() => setVoucherCode(v.code)}
+                                            className="text-xs bg-gray-100 hover:bg-blue-50 hover:text-blue-700
+                                                    border border-gray-200 hover:border-blue-300
+                                                    rounded-lg px-3 py-1.5 font-mono transition-colors"
+                                        >
+                                            {v.code} — {v.type === 'percentage' ? `${v.value}% off` : `LKR ${Number(v.value).toLocaleString('en-LK')} off`}
+                                            {v.is_low_income_only && ' 🎓'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </div>
-
-                    {voucher && (
-                        <div className="flex justify-between text-sm mb-2">
-                            <span className="text-gray-600">Discount</span>
-                            <span className="text-green-600 font-medium">
-                                − LKR {Number(voucher.discount_amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                            </span>
-                        </div>
-                    )}
 
                     {/* Submit */}
                     <div className="px-6 py-5">

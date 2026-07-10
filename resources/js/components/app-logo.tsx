@@ -3,13 +3,12 @@ import AppLogoIcon from '@/components/app-logo-icon';
 export default function AppLogo() {
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
+            <div className="size-9 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0 p-0">
+                <AppLogoIcon className="w-full h-full text-white" />
             </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Laravel Starter Kit
-                </span>
+            <div className="ml-2 grid flex-1 text-left text-sm">
+                <span className="truncate font-bold text-emerald-50 text-base leading-tight">Ulama</span>
+                <span className="truncate text-xs text-emerald-400">Learning Platform</span>
             </div>
         </>
     );

@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
 import { index, create as createCourse } from '@/actions/App/Http/Controllers/CourseController'
 
@@ -37,7 +36,7 @@ interface Props {
 
 export default function TutorDashboard({ profile, stats, pendingPayouts, totalEarnings }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Tutor Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
@@ -199,6 +198,6 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                 </div>
 
             </div>
-        </AppLayout>
+        </>
     );
 }

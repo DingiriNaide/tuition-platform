@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/StudentProfileController';
 import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
 
@@ -27,7 +26,7 @@ interface Props {
 
 export default function StudentDashboard({ profile, stats, pendingPaymentsCount, pendingPaymentsAmount }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Student Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
@@ -138,6 +137,6 @@ export default function StudentDashboard({ profile, stats, pendingPaymentsCount,
                 )}
 
             </div>
-        </AppLayout>
+        </>
     );
 }

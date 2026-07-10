@@ -62,6 +62,22 @@ class PaymentController extends Controller
             }
         }
 
+        $eligibleVouchers = \App\Models\Voucher::where('is_active', true)
+            ->where(function ($q) use ($studentProfile) {
+                $q->where('is_low_income_only', false)
+                ->orWhere(function ($q2) use ($studentProfile) {
+                    $q2->where('is_low_income_only', true)
+                        ->where(fn () => $studentProfile->is_low_income);
+                });
+            })
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('max_uses')->orWhereColumn('times_used', '<', 'max_uses');
+            })
+            ->get(['code', 'type', 'value', 'is_low_income_only']);
+
         $finalAmount = max(0, (float) $booking->amount_due - $discount);
 
         // ── Payment record ────────────────────────────────────────────────────────
@@ -83,7 +99,14 @@ class PaymentController extends Controller
             // Monthly — reuse existing pending or create new
             $payment = $booking->payments()->where('status', 'pending')->first();
 
-            if (! $payment) {
+            if ($payment) {
+                // Update amount if voucher applied
+                $payment->update([
+                    'amount'          => $finalAmount,
+                    'voucher_id'      => $voucher?->id,
+                    'discount_amount' => $discount,
+                ]);
+            } else {
                 $payment = DB::transaction(function () use ($booking, $studentProfile, $finalAmount, $voucher, $discount): Payment {
                     $p                     = new Payment();
                     $p->booking_id         = $booking->id;
@@ -154,6 +177,7 @@ class PaymentController extends Controller
                 'value'           => $voucher->value,
             ] : null,
             'voucher_error' => $voucherError,
+            'available_vouchers' => $eligibleVouchers,
         ]);
     }
 
