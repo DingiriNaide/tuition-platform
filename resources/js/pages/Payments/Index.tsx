@@ -1,8 +1,10 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { show as bookingsShow } from '@/actions/App/Http/Controllers/BookingController';
 import { initiate as paymentsInitiate } from '@/actions/App/Http/Controllers/PaymentController';
 import { refund as paymentsRefund } from '@/actions/App/Http/Controllers/PaymentController';
+import EmptyState from '@/components/empty-state';
+import { DollarSign } from 'lucide-react';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 
 interface Payment {
     id: number;
@@ -71,16 +73,18 @@ function RefundButton({ paymentId }: { paymentId: number }) {
 
 export default function Index({ payments }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Payment History" />
             <div className="max-w-4xl mx-auto py-8 px-4">
                 <h1 className="text-2xl font-bold text-gray-900 mb-6">Payment History</h1>
 
                 {payments.data.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-gray-300 bg-white
-                                    px-6 py-16 text-center text-gray-400">
-                        No payments found.
-                    </div>
+                    <EmptyState
+                        icon={DollarSign}
+                        title="No payments found."
+                        description="You haven't booked any courses yet. Browse available courses and book your first session."
+                        action={{ label: 'Browse Courses', href: coursesIndex.url() }}
+                    />
                 ) : (
                     <div className="space-y-3">
                         {payments.data.map((payment) => (
@@ -178,6 +182,6 @@ export default function Index({ payments }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }

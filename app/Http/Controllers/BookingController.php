@@ -1,7 +1,5 @@
 <?php
 
-// app/Http/Controllers/BookingController.php
-
 declare(strict_types=1);
 
 namespace App\Http\Controllers;

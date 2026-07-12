@@ -20,6 +20,7 @@ createInertiaApp({
         if (name === 'landing' || name === 'welcome') return null;
         if (name.startsWith('auth/')) return AuthLayout;
         if (name.startsWith('settings/')) return [AppLayout, SettingsLayout];
+        if (name === 'error') return null;
         return AppLayout;
     },
     strictMode: true,

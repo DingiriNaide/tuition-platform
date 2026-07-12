@@ -1,8 +1,8 @@
-// resources/js/pages/Attendance/StudentSummary.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import { bookingRoster } from '@/actions/App/Http/Controllers/AttendanceController';
+import EmptyState from '@/components/empty-state';
+import { CheckSquare } from 'lucide-react';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 
 interface AttendanceRecord {
     id: number;
@@ -75,7 +75,7 @@ export default function StudentAttendanceSummary({
     statusOptions,
 }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="My Attendance" />
 
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -153,12 +153,19 @@ export default function StudentAttendanceSummary({
                     Recent Sessions ({records.total})
                 </h2>
 
-                {records.data.length === 0 ? (
+                {/* {records.data.length === 0 ? (
                     <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600">
                         <p className="text-gray-500 dark:text-gray-400">
                             No attendance records yet.
                         </p>
-                    </div>
+                    </div> */}
+                {records.data.length === 0 ? (
+                    <EmptyState
+                        icon={CheckSquare}
+                        title="No attendance records yet."
+                        description="You haven't attended any sessions yet."
+                        action={{ label: 'Browse Courses', href: coursesIndex.url() }}
+                    />
                 ) : (
                     <>
                         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -228,6 +235,6 @@ export default function StudentAttendanceSummary({
                     </>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }

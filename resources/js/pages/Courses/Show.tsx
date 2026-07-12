@@ -1,10 +1,8 @@
-// resources/js/pages/Courses/Show.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { edit, destroy, index } from '@/actions/App/Http/Controllers/CourseController';
 import { create as createBooking } from '@/actions/App/Http/Controllers/BookingController';
 import { useState } from 'react';
+import { Star } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -75,7 +73,7 @@ export default function CourseShow({
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title={course.title} />
 
             <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -320,11 +318,11 @@ export default function CourseShow({
                             </p>
                             {course.tutor_profile.rating && (
                                 <p className="mt-2 flex items-center gap-1 text-sm">
-                                    <span className="text-yellow-400">★</span>
-                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                    <Star className="size-4 text-amber-400 fill-amber-400" />
+                                    <span className="font-semibold text-gray-900">
                                         {Number(course.tutor_profile.rating).toFixed(1)}
                                     </span>
-                                    <span className="text-gray-500 dark:text-gray-400">
+                                    <span className="text-gray-500">
                                         ({course.tutor_profile.total_reviews} reviews)
                                     </span>
                                 </p>
@@ -356,7 +354,7 @@ export default function CourseShow({
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

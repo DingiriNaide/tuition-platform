@@ -1,6 +1,3 @@
-// resources/js/pages/ProgressReports/Show.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { edit, index } from '@/actions/App/Http/Controllers/ProgressReportController';
 
@@ -61,7 +58,7 @@ export default function ProgressReportShow({ report, gradeOptions, gradeColors }
         : 'gray';
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Progress Report — ${report.student_profile.full_name}`} />
 
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -174,7 +171,7 @@ export default function ProgressReportShow({ report, gradeOptions, gradeColors }
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

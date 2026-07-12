@@ -1,8 +1,8 @@
-// resources/js/pages/ProgressReports/Index.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import { show, edit } from '@/actions/App/Http/Controllers/ProgressReportController';
+import EmptyState from '@/components/empty-state';
+import { BarChart2 } from 'lucide-react';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 
 interface Report {
     id: number;
@@ -51,7 +51,7 @@ export default function ProgressReportsIndex({
     gradeColors,
 }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Progress Reports" />
 
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -65,11 +65,12 @@ export default function ProgressReportsIndex({
                 </div>
 
                 {reports.data.length === 0 ? (
-                    <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600">
-                        <p className="text-gray-500 dark:text-gray-400">
-                            No reports yet. Create one from a booking's detail page.
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={BarChart2}
+                        title="No reports yet"
+                        description="You have not created any reports yet. Create one from a booking's detail page."
+                        action={{ label: 'Browse Courses', href: coursesIndex.url() }}
+                    />
                 ) : (
                     <div className="space-y-3">
                         {reports.data.map((report) => {
@@ -144,6 +145,6 @@ export default function ProgressReportsIndex({
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }

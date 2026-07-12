@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import {show as bookingsShow } from '@/actions/App/Http/Controllers/BookingController';
 
@@ -14,7 +13,7 @@ interface Props {
 
 export default function Cancel({ payment }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Payment Cancelled" />
             <div className="max-w-lg mx-auto py-16 px-4 text-center">
                 <div className="size-20 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-6">
@@ -58,6 +57,6 @@ export default function Cancel({ payment }: Props) {
                     )}
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

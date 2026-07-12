@@ -1,6 +1,4 @@
-// resources/js/pages/ProgressReports/Edit.tsx
-
-import AppLayout from '@/layouts/app-layout';
+import  from '@/layouts/app-layout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { show as showReport } from '@/actions/App/Http/Controllers/ProgressReportController';
@@ -74,7 +72,7 @@ export default function ProgressReportEdit({ report, gradeOptions }: Props) {
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Edit Report — ${report.student_profile.full_name}`} />
 
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -272,7 +270,7 @@ export default function ProgressReportEdit({ report, gradeOptions }: Props) {
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/CourseController';
 import { FormEvent } from 'react';
@@ -70,7 +69,7 @@ export default function CourseCreate({
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Create Course" />
 
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -301,7 +300,7 @@ export default function CourseCreate({
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

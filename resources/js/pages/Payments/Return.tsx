@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { show as bookingsShow } from '@/actions/App/Http/Controllers/BookingController';
 import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
@@ -18,7 +17,7 @@ export default function Return({ payment }: Props) {
     const isSuccess = payment?.status === 'completed';
 
     return (
-        <AppLayout>
+        <>
             <Head title={isSuccess ? 'Payment Successful' : 'Payment Processing'} />
             <div className="max-w-lg mx-auto py-16 px-4 text-center">
                 <div className={`size-20 mx-auto rounded-full flex items-center justify-center mb-6
@@ -88,6 +87,6 @@ export default function Return({ payment }: Props) {
                     </Link>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

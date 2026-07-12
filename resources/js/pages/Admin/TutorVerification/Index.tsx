@@ -1,5 +1,4 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 
 interface Subject {
     id: number;
@@ -37,7 +36,7 @@ interface Props {
 
 export default function Index({ pending, verified }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Tutor Verification" />
             <div className="max-w-5xl mx-auto p-6 space-y-8">
 
@@ -135,6 +134,6 @@ export default function Index({ pending, verified }: Props) {
                 </div>
 
             </div>
-        </AppLayout>
+        </>
     );
 }

@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm ,Link } from '@inertiajs/react';
 import { mockCheckout } from '@/actions/App/Http/Controllers/PaymentController';
 import { useState } from 'react';
@@ -77,7 +76,7 @@ export default function Checkout({ booking, payment, payhere, student, voucher, 
     const [voucherCode, setVoucherCode] = useState('');
 
     return (
-        <AppLayout>
+        <>
             <Head title="Complete Payment" />
             <div className="max-w-2xl mx-auto py-10 px-4">
 
@@ -251,6 +250,6 @@ export default function Checkout({ booking, payment, payhere, student, voucher, 
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

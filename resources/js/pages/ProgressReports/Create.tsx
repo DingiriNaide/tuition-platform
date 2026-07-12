@@ -1,6 +1,3 @@
-// resources/js/pages/ProgressReports/Create.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { show as showBooking } from '@/actions/App/Http/Controllers/BookingController';
@@ -70,7 +67,7 @@ export default function ProgressReportCreate({
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Create Progress Report" />
 
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -231,7 +228,7 @@ export default function ProgressReportCreate({
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

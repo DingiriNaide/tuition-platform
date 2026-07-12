@@ -1,9 +1,8 @@
-// resources/js/pages/Courses/Index.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { index, create, show } from '@/actions/App/Http/Controllers/CourseController';
+import EmptyState from '@/components/empty-state';
+import { BookOpen } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -98,7 +97,7 @@ export default function CoursesIndex({
     const hasActiveFilters = Object.values(filters).some(Boolean);
 
     return (
-        <AppLayout>
+        <>
             <Head title="Courses" />
 
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -117,7 +116,7 @@ export default function CoursesIndex({
                     {isTutor && (
                         <Link
                             href={create.url()}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                         >
                             + New Course
                         </Link>
@@ -139,7 +138,7 @@ export default function CoursesIndex({
                             />
                             <button
                                 type="submit"
-                                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                                className="px-3 py-2 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition-colors"
                             >
                                 Search
                             </button>
@@ -208,17 +207,20 @@ export default function CoursesIndex({
 
                 {/* ── Grid ── */}
                 {courses.data.length === 0 ? (
-                    <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600">
-                        <p className="text-gray-500 dark:text-gray-400">No courses found.</p>
-                        {isTutor && (
-                            <Link
-                                href={create.url()}
-                                className="mt-3 inline-block text-sm text-indigo-600 hover:underline dark:text-indigo-400"
-                            >
-                                Create the first course →
-                            </Link>
-                        )}
-                    </div>
+                    <EmptyState
+                        icon={BookOpen}
+                        title="No courses found"
+                        description={
+                            isTutor
+                                ? "You haven't created any courses yet. Create your first course to start offering sessions."
+                                : "No courses match your search or filter criteria. Try adjusting your filters or search terms."
+                        }
+                        action={
+                            isTutor
+                                ? { label: 'Create First Course', href: create.url() }
+                                : undefined
+                        }
+                    />
                 ) : (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {courses.data.map((course) => (
@@ -247,7 +249,7 @@ export default function CoursesIndex({
                                 className={[
                                     'rounded border px-3 py-1 text-sm',
                                     link.active
-                                        ? 'bg-indigo-600 text-white border-indigo-600'
+                                        ? 'bg-emerald-600 text-white border-emerald-600'
                                         : 'border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700',
                                 ].join(' ')}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
@@ -256,7 +258,7 @@ export default function CoursesIndex({
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }
 
@@ -277,58 +279,57 @@ function CourseCard({
     return (
         <Link
             href={show.url(course.id)}
-            className="group flex flex-col rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+            className="group flex flex-col rounded-2xl border border-gray-100 bg-white
+                       shadow-sm hover:shadow-md transition-shadow overflow-hidden"
         >
-            {/* Badges */}
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
-                    {course.subject.name}
-                </span>
-                <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                    {syllabusOptions[course.syllabus] ?? course.syllabus}
-                </span>
+            {/* Card header */}
+            <div className="bg-emerald-50 px-5 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                        {course.subject.name}
+                    </span>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                        {syllabusOptions[course.syllabus] ?? course.syllabus}
+                    </span>
+                </div>
+                <h3 className="font-bold text-gray-900 leading-snug group-hover:text-emerald-700 transition-colors">
+                    {course.title}
+                </h3>
             </div>
 
-            {/* Title */}
-            <h3 className="mb-1 text-base font-semibold text-gray-900 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
-                {course.title}
-            </h3>
+            {/* Card body */}
+            <div className="px-5 py-4 flex flex-col flex-1">
+                <p className="text-sm text-gray-500 mb-3">by {course.tutor_profile.full_name}</p>
 
-            {/* Tutor */}
-            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                by {course.tutor_profile.full_name}
-            </p>
+                <div className="flex gap-2 flex-wrap mb-4">
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                        {gradeOptions[course.grade] ?? course.grade}
+                    </span>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                        {mediumOptions[course.medium] ?? course.medium}
+                    </span>
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                        {course.is_group ? `Group · max ${course.max_students}` : '1-on-1'}
+                    </span>
+                </div>
 
-            {/* Meta */}
-            <div className="mt-auto flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <span className="rounded bg-gray-100 px-2 py-0.5 dark:bg-gray-700">
-                    {gradeOptions[course.grade] ?? course.grade}
-                </span>
-                <span className="rounded bg-gray-100 px-2 py-0.5 dark:bg-gray-700">
-                    {mediumOptions[course.medium] ?? course.medium}
-                </span>
-                <span className="rounded bg-gray-100 px-2 py-0.5 dark:bg-gray-700">
-                    {course.is_group ? `Group · max ${course.max_students}` : 'Private'}
-                </span>
-            </div>
-
-            {/* Price */}
-            <div className="mt-3 border-t border-gray-100 pt-3 dark:border-gray-700">
-                {course.price_per_session && (
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        LKR {Number(course.price_per_session).toLocaleString('en-LK')}
-                        <span className="ml-1 text-xs font-normal text-gray-500">/ session</span>
-                    </p>
-                )}
-                {course.price_monthly && (
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        LKR {Number(course.price_monthly).toLocaleString('en-LK')}
-                        <span className="ml-1 text-xs font-normal text-gray-500">/ month</span>
-                    </p>
-                )}
-                {!course.price_per_session && !course.price_monthly && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500">Contact for pricing</p>
-                )}
+                <div className="mt-auto pt-3 border-t border-gray-100">
+                    {course.price_per_session && (
+                        <p className="font-bold text-emerald-700">
+                            LKR {Number(course.price_per_session).toLocaleString('en-LK')}
+                            <span className="text-xs font-normal text-gray-400 ml-1">/session</span>
+                        </p>
+                    )}
+                    {course.price_monthly && (
+                        <p className="text-sm text-gray-500">
+                            LKR {Number(course.price_monthly).toLocaleString('en-LK')}
+                            <span className="text-xs ml-1">/month</span>
+                        </p>
+                    )}
+                    {!course.price_per_session && !course.price_monthly && (
+                        <p className="text-xs text-gray-400">Contact for pricing</p>
+                    )}
+                </div>
             </div>
         </Link>
     );

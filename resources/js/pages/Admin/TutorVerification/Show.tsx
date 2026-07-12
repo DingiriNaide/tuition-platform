@@ -1,5 +1,4 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
 
 interface Subject {
@@ -62,7 +61,7 @@ export default function Show({ tutor }: Props) {
     }, {} as Record<string, Subject[]>) ?? {};
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Review — ${tutor.full_name}`} />
             <div className="max-w-3xl mx-auto p-6 space-y-6">
 
@@ -203,6 +202,6 @@ export default function Show({ tutor }: Props) {
                 )}
 
             </div>
-        </AppLayout>
+        </>
     );
 }

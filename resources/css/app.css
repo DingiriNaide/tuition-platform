@@ -139,6 +139,7 @@
 @layer base {
     * {
         @apply border-border;
+        outline-color: oklch(0.53 0.15 155);
     }
 
     body {

@@ -1,6 +1,8 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import { show } from '@/actions/App/Http/Controllers/BookingController';
+import EmptyState from '@/components/empty-state';
+import { CalendarDays } from 'lucide-react';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 
 interface Booking {
     id: number;
@@ -52,7 +54,7 @@ function formatDate(dateStr: string): string {
 
 export default function BookingsIndex({ bookings }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="My Bookings" />
 
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -61,9 +63,12 @@ export default function BookingsIndex({ bookings }: Props) {
                 </h1>
 
                 {bookings.data.length === 0 ? (
-                    <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600">
-                        <p className="text-gray-500 dark:text-gray-400">No bookings yet.</p>
-                    </div>
+                    <EmptyState
+                        icon={CalendarDays}
+                        title="No bookings yet"
+                        description="You haven't booked any courses yet. Browse available courses and book your first session."
+                        action={{ label: 'Browse Courses', href: coursesIndex.url() }}
+                    />
                 ) : (
                     <div className="space-y-4">
                         {bookings.data.map((booking) => (
@@ -140,6 +145,6 @@ export default function BookingsIndex({ bookings }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }

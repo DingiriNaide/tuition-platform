@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { mockSuccess } from '@/actions/App/Http/Controllers/PaymentController';
@@ -64,7 +63,7 @@ export default function MockCheckout({ checkoutData }: Props) {
     const isCardMethod = ['VISA', 'MASTER', 'AMEX'].includes(selectedMethod);
 
     return (
-        <AppLayout>
+        <>
             <Head title="PayHere Mock Checkout" />
             <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
                 <div className="w-full max-w-md">
@@ -218,6 +217,6 @@ export default function MockCheckout({ checkoutData }: Props) {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

@@ -1,11 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
+import { Users, CalendarDays, FileText, BookOpen, DollarSign, Clock, PlusCircle } from 'lucide-react';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
-import { index, create as createCourse } from '@/actions/App/Http/Controllers/CourseController'
+import { index, create as createCourse } from '@/actions/App/Http/Controllers/CourseController';
+import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
 
 interface Subject {
     id: number;
     name: string;
-    syllabus: string;
 }
 
 interface TutorProfile {
@@ -24,7 +25,7 @@ interface Stats {
     total_students: number;
     upcoming_classes: number;
     pending_reviews: number;
-    monthly_earnings: number;
+    active_courses: number;
 }
 
 interface Props {
@@ -37,96 +38,115 @@ interface Props {
 export default function TutorDashboard({ profile, stats, pendingPayouts, totalEarnings }: Props) {
     return (
         <>
-            <Head title="Tutor Dashboard" />
+            <Head title="Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
+                {/* Profile incomplete */}
                 {!profile && (
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 flex items-center justify-between">
-                        <p className="text-yellow-800 dark:text-yellow-200 text-sm">Complete your tutor profile to start teaching.</p>
-                        <Link
-                            href={create.url()}
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded text-sm hover:bg-yellow-600"
-                        >
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between">
+                        <p className="text-amber-800 text-sm font-medium">Complete your tutor profile to start teaching.</p>
+                        <Link href={create.url()}
+                            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">
                             Create Profile
                         </Link>
                     </div>
                 )}
 
+                {/* Pending verification */}
                 {profile && !profile.is_verified && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                        <p className="text-blue-800 dark:text-blue-200 text-sm">
-                            Your profile is pending verification. An admin will review your details shortly.
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
+                        <p className="text-blue-800 text-sm font-medium">
+                            ⏳ Your profile is pending admin verification. You'll be notified once approved.
                         </p>
                     </div>
                 )}
 
-                <div>
-                    <h1 className="text-2xl font-semibold">
-                        Welcome back{profile ? `, ${profile.full_name}` : ''}!
-                    </h1>
-                    <p className="text-gray-500 text-sm mt-1">Here's your teaching overview.</p>
+                {/* Welcome */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Welcome back{profile ? `, ${profile.full_name.split(' ')[0]}` : ''}!
+                        </h1>
+                        <p className="text-gray-500 text-sm mt-1">Here's your teaching overview.</p>
+                    </div>
+                    {profile?.is_verified && (
+                        <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-3 py-1 rounded-full">
+                            ✓ Verified Tutor
+                        </span>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
-                        <p className="text-sm text-gray-500">Total Students</p>
-                        <p className="text-3xl font-semibold mt-1">{stats.total_students}</p>
+                {/* Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {[
+                        { label: 'Total Students',   value: stats.total_students,   icon: Users,       color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                        { label: 'Upcoming Classes', value: stats.upcoming_classes, icon: CalendarDays, color: 'text-blue-600',   bg: 'bg-blue-50'    },
+                        { label: 'Pending Reviews',  value: stats.pending_reviews,  icon: FileText,    color: 'text-amber-600',  bg: 'bg-amber-50'   },
+                        { label: 'Active Courses',   value: stats.active_courses,   icon: BookOpen,    color: 'text-purple-600', bg: 'bg-purple-50'  },
+                    ].map(({ label, value, icon: Icon, color, bg }) => (
+                        <div key={label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-3">
+                                <p className="text-xs text-gray-500">{label}</p>
+                                <div className={`size-7 rounded-lg ${bg} flex items-center justify-center`}>
+                                    <Icon className={`size-3.5 ${color}`} />
+                                </div>
+                            </div>
+                            <p className="text-3xl font-bold text-gray-900">{value}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Earnings */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Clock className="size-4 text-amber-600" />
+                            <p className="text-sm text-amber-700 font-medium">Pending Payouts</p>
+                        </div>
+                        <p className="text-2xl font-bold text-amber-900">
+                            LKR {Number(pendingPayouts).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                        </p>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
-                        <p className="text-sm text-gray-500">Upcoming Classes</p>
-                        <p className="text-3xl font-semibold mt-1">{stats.upcoming_classes}</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
-                        <p className="text-sm text-gray-500">Pending Reviews</p>
-                        <p className="text-3xl font-semibold mt-1">{stats.pending_reviews}</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
-                        <p className="text-sm text-gray-500">Monthly Earnings</p>
-                        <p className="text-3xl font-semibold mt-1">LKR {stats.monthly_earnings.toLocaleString()}</p>
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <DollarSign className="size-4 text-emerald-600" />
+                            <p className="text-sm text-emerald-700 font-medium">Total Earnings</p>
+                        </div>
+                        <p className="text-2xl font-bold text-emerald-900">
+                            LKR {Number(totalEarnings).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                        </p>
                     </div>
                 </div>
 
+                {/* Profile card */}
                 {profile && (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
+                    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="font-medium">My Profile</h2>
-                            <Link
-                                href={edit.url()}
-                                className="text-sm text-blue-600 hover:underline"
-                            >
+                            <h2 className="font-semibold text-gray-900">My Profile</h2>
+                            <Link href={edit.url()} className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                                 Edit
                             </Link>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                            <div>
-                                <p className="text-gray-500">Status</p>
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${profile.is_verified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                    {profile.is_verified ? 'Verified' : 'Pending'}
-                                </span>
-                            </div>
-                            <div>
-                                <p className="text-gray-500">Rating</p>
-                                <p className="font-medium">{Number(profile.rating).toFixed(1)} ★ ({profile.total_reviews} reviews)</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-500">Hourly Rate</p>
-                                <p className="font-medium">LKR {profile.hourly_rate ?? '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-500">Medium</p>
-                                <p className="font-medium capitalize">{profile.medium}</p>
-                            </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                            {[
+                                { label: 'Rating',     value: `${Number(profile.rating).toFixed(1)} ★ (${profile.total_reviews} reviews)` },
+                                { label: 'Hourly Rate', value: `LKR ${profile.hourly_rate ?? '—'}` },
+                                { label: 'Medium',     value: profile.medium },
+                                { label: 'Status',     value: profile.is_active ? 'Active' : 'Inactive' },
+                            ].map(({ label, value }) => (
+                                <div key={label}>
+                                    <p className="text-gray-400 text-xs mb-0.5">{label}</p>
+                                    <p className="font-medium text-gray-800 capitalize">{value}</p>
+                                </div>
+                            ))}
                         </div>
-
                         {profile.subjects?.length > 0 && (
                             <div>
-                                <p className="text-sm text-gray-500 mb-2">Subjects</p>
+                                <p className="text-xs text-gray-400 mb-2">Subjects</p>
                                 <div className="flex flex-wrap gap-2">
                                     {profile.subjects.map(subject => (
-                                        <span
-                                            key={subject.id}
-                                            className="px-3 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs"
-                                        >
+                                        <span key={subject.id}
+                                            className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium">
                                             {subject.name}
                                         </span>
                                     ))}
@@ -136,67 +156,31 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                     </div>
                 )}
 
-                <div className="bg-white dark:bg-gray-800 rounded-lg border p-5">
-                    <h2 className="font-medium mb-3">Quick Actions</h2>
+                {/* Quick actions */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                    <h2 className="font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3">
-                        <Link
-                            href="/courses/create"
-                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
-                        >
-                            <p className="font-medium text-sm">Create Course</p>
-                            <p className="text-xs text-gray-500 mt-1">List a new course for students</p>
-                        </Link>
-                        <Link
-                            href="/schedules/create"
-                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
-                        >
-                            <p className="font-medium text-sm">Schedule Class</p>
-                            <p className="text-xs text-gray-500 mt-1">Set up an upcoming session</p>
-                        </Link>
-                        <Link
-                            href="/assignment/view"
-                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
-                        >
-                            <p className="font-medium text-sm">View Assignments</p>
-                            <p className="text-xs text-gray-500 mt-1">Review student submissions</p>
-                        </Link>
-                        <Link
-                            href="/profile/analytics"
-                            className="border rounded-lg p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition block"
-                        >
-                            <p className="font-medium text-sm">Earnings Report</p>
-                            <p className="text-xs text-gray-500 mt-1">View your payment history</p>
-                        </Link>
+                        {[
+                            { title: 'Create Course',    desc: 'List a new course for students',    href: createCourse.url(),  icon: PlusCircle  },
+                            { title: 'My Courses',       desc: 'View and manage your courses',      href: index.url(),         icon: BookOpen    },
+                            { title: 'View Earnings',    desc: 'Check your payment history',        href: paymentsIndex.url(), icon: DollarSign  },
+                            { title: 'Schedule Class',   desc: 'Set up an upcoming session',        href: '/schedules/create', icon: CalendarDays},
+                        ].map(({ title, desc, href, icon: Icon }) => (
+                            <Link key={title} href={href}
+                                className="flex items-start gap-3 border border-gray-100 rounded-xl p-4
+                                           hover:bg-emerald-50 hover:border-emerald-200 transition-colors group">
+                                <div className="size-8 rounded-lg bg-gray-100 group-hover:bg-emerald-100
+                                                flex items-center justify-center shrink-0 mt-0.5">
+                                    <Icon className="size-4 text-gray-500 group-hover:text-emerald-600" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-sm text-gray-900">{title}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
                 </div>
-
-                <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
-                    <h2 className="mb-3 font-semibold text-gray-900 dark:text-white">My Courses</h2>
-                    <div className="flex gap-3">
-                        <Link href={index.url()} className="text-sm text-indigo-600 hover:underline dark:text-indigo-400">
-                            View all courses
-                        </Link>
-                        <span className="text-gray-300 dark:text-gray-600">·</span>
-                        <Link href={createCourse.url()} className="text-sm text-indigo-600 hover:underline dark:text-indigo-400">
-                            Create new course
-                        </Link>
-                    </div>
-                </div>
-
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-                    <p className="text-sm text-amber-700">Pending Payouts</p>
-                    <p className="text-2xl font-bold text-amber-900">
-                        LKR {Number(pendingPayouts).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                    </p>
-                </div>
-
-                <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4">
-                    <p className="text-sm text-green-700">Total Earnings</p>
-                    <p className="text-2xl font-bold text-green-900">
-                        LKR {Number(totalEarnings).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                    </p>
-                </div>
-
             </div>
         </>
     );

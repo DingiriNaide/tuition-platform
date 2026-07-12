@@ -1,6 +1,3 @@
-// resources/js/pages/LiveSession/Room.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useWebRTC } from '@/hooks/useWebRTC';
@@ -189,7 +186,7 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
 
     if (sessionEnded) {
         return (
-            <AppLayout>
+            <>
                 <Head title="Session Ended" />
                 <div className="flex min-h-screen flex-col items-center justify-center gap-4">
                     <div className="rounded-full bg-gray-100 p-6 dark:bg-gray-800">
@@ -208,7 +205,7 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
                         Back to Dashboard
                     </button>
                 </div>
-            </AppLayout>
+            </>
         );
     }
 
@@ -216,7 +213,7 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
     const totalTiles      = participantList.filter((p) => p.stream).length;
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Live — ${liveSession.course.title}`} />
 
             {/* Full-viewport layout — no page padding */}
@@ -516,7 +513,7 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }
 

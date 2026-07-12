@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { toggle } from '@/actions/App/Http/Controllers/Admin/VoucherController';
 import { destroy } from '@/actions/App/Http/Controllers/Admin/VoucherController';
@@ -114,7 +113,7 @@ export default function Index({ vouchers }: Props) {
     const destroyForm = useForm({});
 
     return (
-        <AppLayout>
+        <>
             <Head title="Voucher Management" />
             <div className="max-w-5xl mx-auto py-8 px-4">
                 <h1 className="text-2xl font-bold text-gray-900 mb-6">Voucher Management</h1>
@@ -183,6 +182,6 @@ export default function Index({ vouchers }: Props) {
                     </table>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }
