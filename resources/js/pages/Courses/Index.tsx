@@ -1,6 +1,4 @@
-// resources/js/pages/Courses/Index.tsx
 
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { index, create, show } from '@/actions/App/Http/Controllers/CourseController';
@@ -98,7 +96,7 @@ export default function CoursesIndex({
     const hasActiveFilters = Object.values(filters).some(Boolean);
 
     return (
-        <AppLayout>
+        <>
             <Head title="Courses" />
 
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -256,7 +254,7 @@ export default function CoursesIndex({
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }
 

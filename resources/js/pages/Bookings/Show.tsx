@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+
 import { Head, router, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { cancel, confirm, show } from '@/actions/App/Http/Controllers/BookingController';
@@ -106,7 +106,7 @@ export default function BookingShow({ booking, dayOptions }: Props) {
     const cancelledSessions = booking.sessions.filter((s) => s.status === 'cancelled');
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Booking #${booking.id}`} />
 
             <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -425,6 +425,6 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                     </div>
                 </div>
             )}
-        </AppLayout>
+        </>
     );
 }

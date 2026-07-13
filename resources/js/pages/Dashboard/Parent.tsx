@@ -23,7 +23,7 @@ interface Props {
 
 export default function ParentDashboard({ profile, stats }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="Parent Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
@@ -112,6 +112,6 @@ export default function ParentDashboard({ profile, stats }: Props) {
                 </div>
 
             </div>
-        </AppLayout>
+        </>
     );
 }

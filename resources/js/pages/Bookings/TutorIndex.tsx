@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+
 import { Head, Link, router } from '@inertiajs/react';
 import { show, confirm } from '@/actions/App/Http/Controllers/BookingController';
 
@@ -50,7 +50,7 @@ export default function TutorBookingsIndex({ bookings }: Props) {
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Student Bookings" />
 
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -136,6 +136,6 @@ export default function TutorBookingsIndex({ bookings }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }

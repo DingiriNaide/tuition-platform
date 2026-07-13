@@ -1,6 +1,4 @@
-// resources/js/pages/Courses/Show.tsx
 
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { edit, destroy, index } from '@/actions/App/Http/Controllers/CourseController';
 import { create as createBooking } from '@/actions/App/Http/Controllers/BookingController';
@@ -75,7 +73,7 @@ export default function CourseShow({
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title={course.title} />
 
             <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -356,7 +354,7 @@ export default function CourseShow({
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

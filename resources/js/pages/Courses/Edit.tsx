@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { update, show } from '@/actions/App/Http/Controllers/CourseController';
@@ -91,7 +91,7 @@ export default function CourseEdit({
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Edit — ${course.title}`} />
 
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -304,7 +304,7 @@ export default function CourseEdit({
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

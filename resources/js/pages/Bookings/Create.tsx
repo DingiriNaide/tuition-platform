@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+
 import { Head, useForm } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/BookingController';
 
@@ -56,7 +56,7 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
     const selectedSchedule = schedules.find((s) => String(s.id) === data.schedule_id);
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Book — ${course.title}`} />
 
             <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
@@ -213,7 +213,7 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

@@ -1,4 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
+
 import { Head, Link, router } from '@inertiajs/react';
 import { show } from '@/actions/App/Http/Controllers/BookingController';
 
@@ -52,7 +52,7 @@ function formatDate(dateStr: string): string {
 
 export default function BookingsIndex({ bookings }: Props) {
     return (
-        <AppLayout>
+        <>
             <Head title="My Bookings" />
 
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -140,6 +140,6 @@ export default function BookingsIndex({ bookings }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }
