@@ -13,7 +13,10 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ProgressReportController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\LiveSessionController;
+use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\TutorEarningsController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
@@ -33,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
         Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
         Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+        Route::get('/tutor/earnings', [TutorEarningsController::class, 'index'])->name('tutor.earnings');
     });
 
     // ── Schedules (tutor/admin only) ──────────────────────────────────
@@ -64,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('tutors/{tutorProfile}', [TutorVerificationController::class, 'show'])->name('tutors.show');
         Route::post('tutors/{tutorProfile}/approve', [TutorVerificationController::class, 'approve'])->name('tutors.approve');
         Route::post('tutors/{tutorProfile}/reject', [TutorVerificationController::class, 'reject'])->name('tutors.reject');
+        Route::get('payments', [AdminPaymentController::class, 'index'])->name('payments.index');
     });
 
     // ── Student profile ───────────────────────────────────────────────
@@ -209,6 +214,24 @@ Route::middleware(['auth', 'verified', 'role:admin|super-admin'])->group(functio
     Route::post('/admin/vouchers', [VoucherController::class, 'store'])->name('admin.vouchers.store');
     Route::post('/admin/vouchers/{voucher}/toggle', [VoucherController::class, 'toggle'])->name('admin.vouchers.toggle');
     Route::delete('/admin/vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
+});
+
+// Tutor: Assignments check
+Route::middleware(['auth', 'role:tutor'])->group(function () {
+    Route::get('courses/{course}/assignments', [AssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('courses/{course}/assignments/create', [AssignmentController::class, 'create'])->name('assignments.create');
+    Route::post('courses/{course}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
+    Route::post('submissions/{submission}/grade', [AssignmentController::class, 'grade'])->name('assignments.grade');
+    Route::get('assignments/{assignment}/edit', [AssignmentController::class, 'edit'])->name('assignments.edit');
+    Route::post('assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
+    Route::delete('assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
+    Route::get('assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->name('assignments.submissions');
+});
+
+// Students: Assignments submit
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('bookings/{booking}/assignments', [AssignmentController::class, 'studentIndex'])->name('assignments.student-index');
+    Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->name('assignments.submit');
 });
 
 require __DIR__.'/settings.php';

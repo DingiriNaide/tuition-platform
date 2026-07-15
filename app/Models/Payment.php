@@ -47,6 +47,11 @@ class Payment extends Model
         return $this->belongsTo(StudentProfile::class);
     }
 
+    public function voucher(): BelongsTo
+    {
+        return $this->belongsTo(Voucher::class);
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     public function isPending(): bool
