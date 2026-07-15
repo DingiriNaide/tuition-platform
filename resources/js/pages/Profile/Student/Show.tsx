@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/StudentProfileController';
 
 interface StudentProfile {
@@ -23,7 +22,7 @@ interface Props {
 export default function Show({ profile }: Props) {
     if (!profile) {
         return (
-            <AppLayout>
+            <>
                 <Head title="Student Profile" />
                 <div className="max-w-2xl mx-auto p-6 text-center">
                     <h1 className="text-2xl font-semibold mb-4">No Profile Found</h1>
@@ -35,7 +34,7 @@ export default function Show({ profile }: Props) {
                         Create Profile
                     </Link>
                 </div>
-            </AppLayout>
+            </>
         );
     }
 
@@ -47,7 +46,7 @@ export default function Show({ profile }: Props) {
     };
 
     return (
-        <AppLayout>
+        <>
             <Head title="Student Profile" />
             <div className="max-w-2xl mx-auto p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -105,6 +104,6 @@ export default function Show({ profile }: Props) {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

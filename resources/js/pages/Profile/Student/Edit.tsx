@@ -1,5 +1,4 @@
 import { useForm, Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { update, show } from '@/actions/App/Http/Controllers/ProfileController/StudentProfileController';
 
 interface StudentProfile {
@@ -40,7 +39,7 @@ export default function Edit({ profile }: Props) {
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Edit Student Profile" />
             <div className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-semibold mb-6">Edit Student Profile</h1>
@@ -184,6 +183,6 @@ export default function Edit({ profile }: Props) {
 
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }

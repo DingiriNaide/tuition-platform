@@ -1,4 +1,3 @@
-import  from '@/layouts/app-layout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { show as showReport } from '@/actions/App/Http/Controllers/ProgressReportController';

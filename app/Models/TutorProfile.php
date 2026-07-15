@@ -53,4 +53,9 @@ class TutorProfile extends Model
     {
         return $this->hasMany(TutorPayout::class);
     }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class);
+    }
 }

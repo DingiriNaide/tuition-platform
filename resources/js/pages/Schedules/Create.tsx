@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/ScheduleController';
 import { FormEvent } from 'react';
@@ -46,7 +45,7 @@ export default function ScheduleCreate({ courses, dayOptions }: Props) {
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Add Schedule" />
 
             <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
@@ -91,7 +90,7 @@ export default function ScheduleCreate({ courses, dayOptions }: Props) {
                                             type="radio"
                                             checked={data.is_recurring === value}
                                             onChange={() => setData('is_recurring', value)}
-                                            className="text-indigo-600"
+                                            className="text-emerald-600"
                                         />
                                         {label}
                                     </label>
@@ -187,14 +186,14 @@ export default function ScheduleCreate({ courses, dayOptions }: Props) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
                         >
                             {processing ? 'Saving…' : 'Save Schedule'}
                         </button>
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 
@@ -229,13 +228,13 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
     return (
         <label className="relative inline-flex cursor-pointer items-center">
             <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-indigo-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
+            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
         </label>
     );
 }
 
 function inp(err: boolean) {
-    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
+    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
 }
 
 function sel(err: boolean) { return inp(err); }

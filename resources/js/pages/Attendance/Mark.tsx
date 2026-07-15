@@ -1,6 +1,3 @@
-// resources/js/pages/Attendance/Mark.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/AttendanceController';
 import { show as showBooking } from '@/actions/App/Http/Controllers/BookingController';
@@ -78,7 +75,7 @@ export default function AttendanceMark({
     };
 
     return (
-        <AppLayout>
+        <>
             <Head title="Mark Attendance" />
 
             <div className="mx-auto max-w-xl px-4 py-8 sm:px-6 lg:px-8">
@@ -220,7 +217,7 @@ export default function AttendanceMark({
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

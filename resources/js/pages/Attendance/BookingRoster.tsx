@@ -1,6 +1,3 @@
-// resources/js/pages/Attendance/BookingRoster.tsx
-
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { show as showBooking } from '@/actions/App/Http/Controllers/BookingController';
 import { mark } from '@/actions/App/Http/Controllers/AttendanceController';
@@ -80,7 +77,7 @@ export default function BookingRoster({
                                'text-red-600 dark:text-red-400';
 
     return (
-        <AppLayout>
+        <>
             <Head title={`Attendance — ${booking.course.title}`} />
 
             <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -215,6 +212,6 @@ export default function BookingRoster({
                     </table>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

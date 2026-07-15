@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     create,
@@ -40,7 +39,7 @@ export default function SchedulesIndex({ schedules, dayOptions }: Props) {
     const inactive = schedules.filter((s) => !s.is_active);
 
     return (
-        <AppLayout>
+        <>
             <Head title="My Schedules" />
 
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -79,7 +78,7 @@ export default function SchedulesIndex({ schedules, dayOptions }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </>
     );
 }
 

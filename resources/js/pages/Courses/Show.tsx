@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { edit, destroy, index } from '@/actions/App/Http/Controllers/CourseController';
 import { create as createBooking } from '@/actions/App/Http/Controllers/BookingController';
+import { index as viewAssignment } from '@/actions/App/Http/Controllers/AssignmentController';
 import { useState } from 'react';
 import { Star } from 'lucide-react';
 
@@ -336,6 +337,12 @@ export default function CourseShow({
                                     Manage this course
                                 </p>
                                 <div className="flex flex-col gap-2">
+                                    <Link
+                                        href={viewAssignment.url(course.id)}
+                                        className="w-full rounded-md border border-emerald-300 bg-white px-3 py-2 text-center text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:border-emerald-700 dark:bg-transparent dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                                    >
+                                        Assignments
+                                    </Link>
                                     <Link
                                         href={edit.url(course.id)}
                                         className="w-full rounded-md border border-amber-300 bg-white px-3 py-2 text-center text-sm font-medium text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:bg-transparent dark:text-amber-300 dark:hover:bg-amber-900/40"

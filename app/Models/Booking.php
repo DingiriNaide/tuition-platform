@@ -92,6 +92,11 @@ class Booking extends Model
         return $this->payment_status === 'paid';
     }
 
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
     // ── Scopes ───────────────────────────────────────────────────────
 
     public function scopePending($query): \Illuminate\Database\Eloquent\Builder

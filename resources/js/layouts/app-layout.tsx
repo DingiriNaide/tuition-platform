@@ -30,7 +30,7 @@ const tutorNav: NavItem[] = [
     { title: 'Bookings',         href: '/tutor/bookings',   icon: CalendarDays},
     { title: 'Schedules',        href: '/schedules',        icon: CalendarDays},
     { title: 'Progress Reports', href: '/progress-reports', icon: FileText    },
-    { title: 'Earnings',         href: '/my-payments',      icon: DollarSign  },
+    { title: 'Earnings',         href: '/tutor/earnings',   icon: DollarSign  },
 ];
 
 const adminNav: NavItem[] = [
@@ -38,6 +38,7 @@ const adminNav: NavItem[] = [
     { title: 'Tutor Verification', href: '/admin/tutors',   icon: ShieldCheck },
     { title: 'Vouchers',           href: '/admin/vouchers', icon: Ticket      },
     { title: 'Courses',            href: '/courses',        icon: BookOpen    },
+    { title: 'Payments',           href: '/admin/payments', icon: CreditCard  },
 ];
 
 const parentNav: NavItem[] = [
