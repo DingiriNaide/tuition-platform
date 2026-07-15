@@ -1,4 +1,3 @@
-
 import { Head, Link, router } from '@inertiajs/react';
 import { show } from '@/actions/App/Http/Controllers/BookingController';
 import EmptyState from '@/components/empty-state';

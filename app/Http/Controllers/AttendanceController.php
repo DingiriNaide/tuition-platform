@@ -165,8 +165,9 @@ class AttendanceController extends Controller
         $studentProfile = StudentProfile::where('user_id', Auth::id())->first();
 
         // Both tutor owner and the student can view
-        $isTutorOwner = $tutorProfile &&
-            $tutorProfile->id === $booking->course->tutorProfile->id ?? false;
+        $isTutorOwner = $tutorProfile
+            && $booking->course->tutorProfile
+            && $tutorProfile->id === $booking->course->tutorProfile->id;
 
         $isStudent = $studentProfile &&
             $studentProfile->id === $booking->student_profile_id;
