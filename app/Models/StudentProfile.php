@@ -30,4 +30,14 @@ class StudentProfile extends Model
     {
         return $this->hasMany(ProgressReport::class);
     }
+
+    public function assignmentSubmissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class);
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

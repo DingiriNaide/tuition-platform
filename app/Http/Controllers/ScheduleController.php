@@ -129,6 +129,12 @@ class ScheduleController extends Controller
             'is_active'     => ['required', 'boolean'],
         ]);
 
+        // Ensure the (possibly changed) course_id still belongs to this tutor —
+        // authorizeOwnership() only verified the schedule itself, not the target course.
+        $tutorProfile = TutorProfile::where('user_id', Auth::id())->firstOrFail();
+        $course = Course::findOrFail($validated['course_id']);
+        abort_unless($course->tutor_profile_id === $tutorProfile->id, 403);
+
         $schedule->update($validated);
 
         return redirect()

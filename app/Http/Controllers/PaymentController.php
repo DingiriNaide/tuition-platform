@@ -204,6 +204,8 @@ class PaymentController extends Controller
             'notify_url'   => ['required', 'string'],
         ]);
 
+        $this->authorizeOrderOwnership($data['order_id']);
+
         return Inertia::render('Payments/MockCheckout', [
             'checkoutData' => $data,
         ]);
@@ -215,7 +217,8 @@ class PaymentController extends Controller
      */
     public function mockSuccess(Request $request): RedirectResponse
     {
-        $orderId  = $request->input('order_id');
+        $orderId = $request->input('order_id');
+        $this->authorizeOrderOwnership($orderId);
         $payments = Payment::where('payhere_order_id', $orderId)->get();
         $totalAmount = $payments->sum('amount');
 
@@ -247,8 +250,9 @@ class PaymentController extends Controller
 
     public function mockFail(Request $request): RedirectResponse
     {
-        $orderId     = $request->input('order_id');
-        $payments    = Payment::where('payhere_order_id', $orderId)->get();
+        $orderId = $request->input('order_id');
+        $this->authorizeOrderOwnership($orderId);
+        $payments = Payment::where('payhere_order_id', $orderId)->get();
         $totalAmount = $payments->sum('amount');
 
         $simulatedPayload = [
@@ -312,6 +316,15 @@ class PaymentController extends Controller
         $orderId = $request->input('order_id');
         $payment = Payment::with('booking')->where('payhere_order_id', $orderId)->first();
 
+        if ($payment) {
+            $studentProfile = Auth::user()->studentProfile;
+            $isAdmin = Auth::user()->hasAnyRole(['admin', 'super-admin']);
+            abort_unless(
+                $isAdmin || ($studentProfile && $payment->student_profile_id === $studentProfile->id),
+                403
+            );
+        }
+
         return Inertia::render('Payments/Return', [
             'payment' => $payment ? [
                 'order_id'   => $payment->payhere_order_id,
@@ -331,6 +344,15 @@ class PaymentController extends Controller
     {
         $orderId = $request->input('order_id');
         $payment = Payment::with('booking')->where('payhere_order_id', $orderId)->first();
+
+        if ($payment) {
+            $studentProfile = Auth::user()->studentProfile;
+            $isAdmin = Auth::user()->hasAnyRole(['admin', 'super-admin']);
+            abort_unless(
+                $isAdmin || ($studentProfile && $payment->student_profile_id === $studentProfile->id),
+                403
+            );
+        }
 
         return Inertia::render('Payments/Cancel', [
             'payment' => $payment ? [
@@ -369,8 +391,8 @@ class PaymentController extends Controller
         $studentProfile = Auth::user()->studentProfile;
 
         // Only admin or the student who owns the payment
-        $isAdmin   = Auth::user()->hasAnyRole(['admin', 'super-admin']);
-        $isOwner   = $studentProfile && $payment->student_profile_id === $studentProfile->id;
+        $isAdmin = Auth::user()->hasAnyRole(['admin', 'super-admin']);
+        $isOwner = $studentProfile && $payment->student_profile_id === $studentProfile->id;
 
         abort_unless($isAdmin || $isOwner, 403);
         abort_unless($payment->status === 'completed', 422);
@@ -381,9 +403,12 @@ class PaymentController extends Controller
             $booking = $payment->booking;
             $booking->decrement('amount_paid', $payment->amount);
 
-            // For per_session, also decrement amount_due
             if ($booking->billing_type === 'per_session') {
                 $booking->decrement('amount_due', $payment->amount);
+            } elseif ((float) $payment->discount_amount > 0) {
+                // Restore amount_due to its pre-discount level — the discounted
+                // payment that justified the lower due amount is now void.
+                $booking->increment('amount_due', $payment->discount_amount);
             }
 
             $booking->fresh()->recalculatePaymentStatus();
@@ -454,6 +479,13 @@ class PaymentController extends Controller
 
         $booking = $payment->booking()->with('course.tutorProfile')->first();
         $booking->increment('amount_paid', $payment->amount);
+
+        // If a voucher discount was applied, permanently reduce what's owed —
+        // otherwise amount_due stays at the pre-discount sticker price forever.
+        if ((float) $payment->discount_amount > 0) {
+            $booking->decrement('amount_due', $payment->discount_amount);
+        }
+
         $booking->fresh()->recalculatePaymentStatus();
 
         // Create tutor payout record
@@ -478,5 +510,18 @@ class PaymentController extends Controller
             'booking_id' => $booking->id,
             'net_amount' => $netAmount,
         ]);
+    }
+
+    private function authorizeOrderOwnership(string $orderId): void
+    {
+        $studentProfile = Auth::user()->studentProfile;
+
+        abort_unless($studentProfile, 403);
+
+        $ownsOrder = Payment::where('payhere_order_id', $orderId)
+            ->where('student_profile_id', $studentProfile->id)
+            ->exists();
+
+        abort_unless($ownsOrder, 403);
     }
 }
