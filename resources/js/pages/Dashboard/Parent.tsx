@@ -25,7 +25,7 @@ interface Props {
 export default function ParentDashboard({ profile, stats }: Props) {
     return (
         <>
-            <Head title="Dashboard" />
+            <Head title="Parent Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
                 {!profile && (
