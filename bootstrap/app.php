@@ -7,10 +7,10 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -38,13 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
-            if (! $request->inertia()) {
-                return $response;
-            }
-
             $status = $response->getStatusCode();
 
-            if (in_array($status, [404, 403, 500, 503])) {
+            if (in_array($status, [403, 404, 500, 503], true)) {
                 return Inertia\Inertia::render('error', ['status' => $status])
                     ->toResponse($request)
                     ->setStatusCode($status);
@@ -52,4 +48,5 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return $response;
         });
-    })->create();
+    })
+    ->create();

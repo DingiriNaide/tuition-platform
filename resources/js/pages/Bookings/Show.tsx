@@ -7,6 +7,8 @@ import { index as reportsIndex } from '@/actions/App/Http/Controllers/ProgressRe
 import { initiate as paymentsInitiate } from '@/actions/App/Http/Controllers/PaymentController';
 import { store as createLiveSession } from '@/actions/App/Http/Controllers/LiveSessionController';
 import { show as showLiveSession } from '@/actions/App/Http/Controllers/LiveSessionController';
+import { studentIndex } from '@/actions/App/Http/Controllers/AssignmentController';
+import { FileText, ClipboardCheck, ClipboardList, Video, CheckCircle2, XCircle } from 'lucide-react';
 
 interface Session {
     id: number;
@@ -300,17 +302,28 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                 {canConfirm && (
                                     <button
                                         onClick={handleConfirm}
-                                        className="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500"
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
                                     >
+                                        <CheckCircle2 className="h-4 w-4" />
                                         Confirm Booking
                                     </button>
                                 )}
 
-                                {/* Attendance roster — visible to tutor and student */}
+                                {isStudent && (
+                                    <Link
+                                        href={studentIndex.url(booking.id)}
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-emerald-300 hover:text-emerald-700"
+                                    >
+                                        <FileText className="h-4 w-4" />
+                                        View Assignments
+                                    </Link>
+                                )}
+
                                 <Link
                                     href={bookingRoster.url(booking.id)}
-                                    className="block w-full rounded-md border border-indigo-300 px-4 py-2 text-center text-sm font-semibold text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
+                                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-emerald-300 hover:text-emerald-700"
                                 >
+                                    <ClipboardCheck className="h-4 w-4" />
                                     View Attendance
                                 </Link>
 
@@ -321,9 +334,10 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                                 booking_id: booking.id,
                                             });
                                         }}
-                                        className="block w-full rounded-md bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-500"
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
                                     >
-                                        ▶ Start Live Session
+                                        <Video className="h-4 w-4" />
+                                        Start Live Session
                                     </button>
                                 )}
 
@@ -336,9 +350,10 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                                 <Link
                                                     key={s.id}
                                                     href={showLiveSession.url(s.live_session!.id)}
-                                                    className="block w-full rounded-md bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-500"
+                                                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
                                                 >
-                                                    {s.live_session!.status === 'live' ? '▶ Join Live Session' : '⏳ Session Starting Soon'}
+                                                    <Video className="h-4 w-4" />
+                                                    {s.live_session!.status === 'live' ? 'Join Live Session' : 'Session Starting Soon'}
                                                 </Link>
                                             ))}
                                     </>
@@ -349,14 +364,16 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                     <>
                                         <Link
                                             href={createReport.url(booking.id)}
-                                            className="block w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-emerald-300 hover:text-emerald-700"
                                         >
+                                            <ClipboardList className="h-4 w-4" />
                                             Write Progress Report
                                         </Link>
                                         <Link
                                             href={reportsIndex.url()}
-                                            className="block w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-emerald-300 hover:text-emerald-700"
                                         >
+                                            <ClipboardList className="h-4 w-4" />
                                             All My Reports
                                         </Link>
                                     </>
@@ -365,8 +382,9 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                 {canCancel && (
                                     <button
                                         onClick={() => setShowCancelModal(true)}
-                                        className="w-full rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
                                     >
+                                        <XCircle className="h-4 w-4" />
                                         Cancel Booking
                                     </button>
                                 )}
