@@ -3,7 +3,7 @@ import { FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/empty-state';
 import { submit } from '@/actions/App/Http/Controllers/AssignmentController';
-import { CheckCircle2, Clock, FileText, Upload } from 'lucide-react';
+import { CheckCircle2, Clock, FileText, Upload, Paperclip } from 'lucide-react';
 
 interface Submission {
     id: number;
@@ -21,6 +21,7 @@ interface Assignment {
     due_date: string | null;
     questions: { id: string; text: string; options: string[]; marks: number }[] | null;
     submissions: Submission[];
+    attachments: { name: string; url: string }[]; // ← add this
 }
 
 const statusBadge: Record<Submission['status'], { label: string; className: string }> = {
@@ -154,6 +155,26 @@ export default function StudentAssignments({ assignments }: { assignments: Assig
                                         <div>
                                             <h3 className="font-medium text-gray-900">{a.title}</h3>
                                             {a.description && <p className="mt-1 text-sm text-gray-500">{a.description}</p>}
+                                            {a.attachments.length > 0 && (
+                                                <div className="mt-2 space-y-1">
+                                                    {a.attachments.length > 0 && (
+                                                    <div className="mt-2 space-y-1">
+                                                        {a.attachments.map((file, i) => (
+                                                        <a
+                                                            key={i}
+                                                            href={file.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center gap-1.5 text-sm text-emerald-600 hover:underline"
+                                                        >
+                                                            <Paperclip className="h-3.5 w-3.5" />
+                                                            {file.name}
+                                                        </a>
+                                                        ))}
+                                                    </div>
+                                                    )}
+                                                </div>
+                                            )}
                                             <p className="mt-2 flex items-center gap-1 text-xs text-gray-400">
                                                 <Clock className="h-3 w-3" />
                                                 {a.due_date

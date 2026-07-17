@@ -94,8 +94,25 @@ class AssignmentController extends Controller
         $assignments = Assignment::where('is_published', true)
             ->where('course_id', $booking->course_id)
             ->where(fn ($q) => $q->whereNull('booking_id')->orWhere('booking_id', $booking->id))
-            ->with(['submissions' => fn ($q) => $q->where('student_profile_id', $booking->student_profile_id)])
-            ->get();
+            ->with([
+                'submissions' => fn ($q) => $q->where('student_profile_id', $booking->student_profile_id),
+                'media', // ← add this
+            ])
+            ->get()
+            ->map(fn ($a) => [
+                'id'                => $a->id,
+                'title'             => $a->title,
+                'description'       => $a->description,
+                'type'              => $a->type,
+                'total_marks'       => $a->total_marks,
+                'due_date'          => $a->due_date,
+                'questions'         => $a->questions,
+                'submissions'       => $a->submissions,
+                'attachments'       => $a->getMedia('attachments')->map(fn ($m) => [
+                    'name' => $m->file_name,
+                    'url'  => $m->getUrl(),
+                ]),
+            ]);
 
         return Inertia::render('Assignments/StudentIndex', compact('booking', 'assignments'));
     }
