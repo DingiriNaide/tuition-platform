@@ -9,9 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Course extends Model
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+class Course extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'tutor_profile_id',
@@ -39,6 +42,18 @@ class Course extends Model
         'is_group'          => 'boolean',
         'is_active'         => 'boolean',
     ];
+
+    protected $appends = ['thumbnail_url'];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('thumbnail')->singleFile();
+    }
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('thumbnail') ?: null;
+    }
 
     // ── Relationships ────────────────────────────────────────────────
 

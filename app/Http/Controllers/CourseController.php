@@ -95,6 +95,17 @@ class CourseController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // ── TEMPORARY DEBUG — remove after diagnosing ──────────────────
+        if ($request->hasFile('thumbnail')) {
+            \Log::info('Thumbnail upload debug', [
+                'error_code'  => $request->file('thumbnail')->getError(),
+                'is_valid'    => $request->file('thumbnail')->isValid(),
+                'size'        => $request->file('thumbnail')->getSize(),
+                'client_name' => $request->file('thumbnail')->getClientOriginalName(),
+            ]);
+        }
+        // ─────────────────────────────────────────────────────────────
+        
         $tutorProfile = TutorProfile::where('user_id', Auth::id())->firstOrFail();
 
         $validated = $request->validate([
@@ -113,9 +124,14 @@ class CourseController extends Controller
             'max_students'     => ['required', 'integer', 'min:1', 'max:500'],
             'is_group'         => ['required', 'boolean'],
             'is_active'        => ['required', 'boolean'],
+            'thumbnail'        => ['nullable', 'image', 'max:5120'],
         ]);
 
-        $course = $tutorProfile->courses()->create($validated);
+        $course = $tutorProfile->courses()->create(collect($validated)->except('thumbnail')->all());
+
+        if ($request->hasFile('thumbnail')) {
+            $course->addMedia($request->file('thumbnail'))->toMediaCollection('thumbnail');
+        }
 
         return redirect()
             ->action([CourseController::class, 'show'], $course)
@@ -188,9 +204,14 @@ class CourseController extends Controller
             'max_students'        => ['required', 'integer', 'min:1', 'max:500'],
             'is_group'            => ['required', 'boolean'],
             'is_active'           => ['required', 'boolean'],
+            'thumbnail'           => ['nullable', 'image', 'max:5120'],
         ]);
 
-        $course->update($validated);
+        $course->update(collect($validated)->except('thumbnail')->all());
+
+        if ($request->hasFile('thumbnail')) {
+            $course->addMedia($request->file('thumbnail'))->toMediaCollection('thumbnail');
+        }
 
         return redirect()
             ->action([CourseController::class, 'show'], $course)

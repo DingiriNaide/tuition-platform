@@ -35,6 +35,7 @@ interface CourseForm {
     max_students: string;
     is_group: boolean;
     is_active: boolean;
+    thumbnail: File | null;
 }
 
 // ── Component ─────────────────────────────────────────────────────────
@@ -61,11 +62,19 @@ export default function CourseCreate({
         max_students: '30',
         is_group: true,
         is_active: true,
+        thumbnail: null,
     });
 
-    function submit(e: FormEvent): void {
+    /* function submit(e: FormEvent): void {
         e.preventDefault();
-        post(store.url());
+        post(store.url(), { forceFormData: true });
+    } */
+   function submit(e: FormEvent): void {
+        e.preventDefault();
+        post(store.url(), {
+            forceFormData: true,
+            onError: (errors) => console.log('Validation errors:', errors),
+        });
     }
 
     return (
@@ -95,6 +104,30 @@ export default function CourseCreate({
                                     </option>
                                 ))}
                             </select>
+                        </Field>
+
+                        {/* Thumbnail */}
+                        <Field label="Thumbnail" error={errors.thumbnail}>
+                            <label className="flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-indigo-400 dark:border-gray-600">
+                                {data.thumbnail ? (
+                                    <img
+                                        src={URL.createObjectURL(data.thumbnail)}
+                                        alt="Preview"
+                                        className="h-12 w-20 rounded object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-12 w-20 items-center justify-center rounded bg-gray-100 text-xs text-gray-400 dark:bg-gray-700">
+                                        No image
+                                    </div>
+                                )}
+                                <span>{data.thumbnail ? data.thumbnail.name : 'Upload a course thumbnail'}</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => setData('thumbnail', e.target.files?.[0] ?? null)}
+                                />
+                            </label>
                         </Field>
 
                         {/* Title (English) */}

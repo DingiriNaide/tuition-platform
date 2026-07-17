@@ -23,6 +23,7 @@ interface Course {
     max_students: number;
     is_group: boolean;
     is_active: boolean;
+    thumbnail_url: string | null;
     tutor_profile: {
         id: number;
         full_name: string;
@@ -90,6 +91,17 @@ export default function CourseShow({
                     <span className="mx-2">›</span>
                     <span className="text-gray-900 dark:text-white">{course.title}</span>
                 </nav>
+
+                {/* ── Thumbnail ── */}
+                {course.thumbnail_url && (
+                    <div className="mb-6 overflow-hidden rounded-lg">
+                        <img
+                            src={course.thumbnail_url}
+                            alt={course.title}
+                            className="h-56 w-full object-cover sm:h-72"
+                        />
+                    </div>
+                )}
 
                 {/* ── Header ── */}
                 <div className="mb-6 flex items-start justify-between gap-4">

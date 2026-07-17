@@ -37,6 +37,7 @@ interface Booking {
     course: {
         id: number;
         title: string;
+        thumbnail_url: string | null;
         subject: { name: string };
         tutor_profile: { full_name: string; user_id: number };
     };
@@ -111,6 +112,17 @@ export default function BookingShow({ booking, dayOptions }: Props) {
             <Head title={`Booking #${booking.id}`} />
 
             <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+
+                {/* ── Course Banner ── */}
+                {booking.course.thumbnail_url && (
+                    <div className="mb-6 overflow-hidden rounded-lg">
+                        <img
+                            src={booking.course.thumbnail_url}
+                            alt={booking.course.title}
+                            className="h-48 w-full object-cover sm:h-64"
+                        />
+                    </div>
+                )}
 
                 {/* ── Header ── */}
                 <div className="mb-6">

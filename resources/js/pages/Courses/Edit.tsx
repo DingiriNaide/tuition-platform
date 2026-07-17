@@ -29,6 +29,7 @@ interface Course {
     max_students: number;
     is_group: boolean;
     is_active: boolean;
+    thumbnail_url: string | null;
 }
 
 interface Props {
@@ -55,6 +56,7 @@ interface CourseForm {
     max_students: string;
     is_group: boolean;
     is_active: boolean;
+    thumbnail: File | null;
 }
 
 // ── Component ─────────────────────────────────────────────────────────
@@ -82,11 +84,12 @@ export default function CourseEdit({
         max_students:         String(course.max_students),
         is_group:             course.is_group,
         is_active:            course.is_active,
+        thumbnail:            null,
     });
 
     function submit(e: React.FormEvent): void {
         e.preventDefault();
-        put(update.url(course.id));
+        put(update.url(course.id), { forceFormData: true });
     }
 
     return (
@@ -119,6 +122,35 @@ export default function CourseEdit({
                                     </option>
                                 ))}
                             </select>
+                        </Field>
+
+                        <Field label="Thumbnail" error={errors.thumbnail}>
+                            <label className="flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-indigo-400 dark:border-gray-600">
+                                {data.thumbnail ? (
+                                    <img
+                                        src={URL.createObjectURL(data.thumbnail)}
+                                        alt="Preview"
+                                        className="h-12 w-20 rounded object-cover"
+                                    />
+                                ) : course.thumbnail_url ? (
+                                    <img
+                                        src={course.thumbnail_url}
+                                        alt="Current thumbnail"
+                                        className="h-12 w-20 rounded object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-12 w-20 items-center justify-center rounded bg-gray-100 text-xs text-gray-400 dark:bg-gray-700">
+                                        No image
+                                    </div>
+                                )}
+                                <span>{data.thumbnail ? data.thumbnail.name : 'Replace thumbnail'}</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => setData('thumbnail', e.target.files?.[0] ?? null)}
+                                />
+                            </label>
                         </Field>
 
                         <Field label="Title (English)" error={errors.title} required>

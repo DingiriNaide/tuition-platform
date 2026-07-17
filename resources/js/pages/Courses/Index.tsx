@@ -33,6 +33,7 @@ interface Course {
     is_active: boolean;
     tutor_profile: TutorProfile;
     subject: Subject;
+    thumbnail_url: string | null;
 }
 
 interface PaginationLink {
@@ -283,6 +284,16 @@ function CourseCard({
                        shadow-sm hover:shadow-md transition-shadow overflow-hidden"
         >
             {/* Card header */}
+            {course.thumbnail_url ? (
+                <img
+                    src={course.thumbnail_url}
+                    alt={course.title}
+                    className="h-36 w-full object-cover"
+                />
+            ) : (
+                <div className="h-36 w-full bg-gradient-to-br from-emerald-50 to-emerald-100" />
+            )}
+
             <div className="bg-emerald-50 px-5 py-4 border-b border-gray-100">
                 <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
