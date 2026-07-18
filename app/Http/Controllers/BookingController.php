@@ -185,9 +185,19 @@ class BookingController extends Controller
             'sessions.liveSession',
         ]);
 
+        $existingReview = null;
+        $studentProfile = Auth::user()->studentProfile ?? null;
+
+        if ($studentProfile) {
+            $existingReview = \App\Models\TutorReview::where('course_id', $booking->course_id)
+                ->where('student_profile_id', $studentProfile->id)
+                ->first(['rating', 'comment']);
+        }
+
         return Inertia::render('Bookings/Show', [
-            'booking'    => $booking,
-            'dayOptions' => Schedule::dayOptions(),
+            'booking'        => $booking,
+            'dayOptions'     => Schedule::dayOptions(),
+            'existingReview' => $existingReview,
         ]);
     }
 

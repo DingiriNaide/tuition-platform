@@ -40,4 +40,9 @@ class StudentProfile extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function tutorReviews(): HasMany
+    {
+        return $this->hasMany(TutorReview::class);
+    }
 }

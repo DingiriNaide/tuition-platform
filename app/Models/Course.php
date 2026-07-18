@@ -77,6 +77,11 @@ class Course extends Model implements HasMedia
         return $this->hasMany(\App\Models\Booking::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(TutorReview::class);
+    }
+
     // ── Scopes ───────────────────────────────────────────────────────
 
     public function scopeActive($query): \Illuminate\Database\Eloquent\Builder

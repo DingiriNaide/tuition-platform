@@ -8,7 +8,8 @@ import { initiate as paymentsInitiate } from '@/actions/App/Http/Controllers/Pay
 import { store as createLiveSession } from '@/actions/App/Http/Controllers/LiveSessionController';
 import { show as showLiveSession } from '@/actions/App/Http/Controllers/LiveSessionController';
 import { studentIndex } from '@/actions/App/Http/Controllers/AssignmentController';
-import { FileText, ClipboardCheck, ClipboardList, Video, CheckCircle2, XCircle } from 'lucide-react';
+import { store as storeReview } from '@/actions/App/Http/Controllers/TutorReviewController';
+import { FileText, ClipboardCheck, ClipboardList, Video, CheckCircle2, XCircle, Star } from 'lucide-react';
 
 interface Session {
     id: number;
@@ -56,6 +57,7 @@ interface Booking {
 interface Props {
     booking: Booking;
     dayOptions: Record<string, string>;
+    existingReview: { rating: number; comment: string | null } | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -68,7 +70,7 @@ const statusColors: Record<string, string> = {
     no_show:   'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 };
 
-export default function BookingShow({ booking, dayOptions }: Props) {
+export default function BookingShow({ booking, dayOptions, existingReview }: Props) {
     const { auth } = usePage<{
         auth: { user: { id: number; roles: string[] } };
     }>().props;
@@ -82,6 +84,18 @@ export default function BookingShow({ booking, dayOptions }: Props) {
 
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
+
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [rating, setRating] = useState(existingReview?.rating ?? 0);
+    const [comment, setComment] = useState(existingReview?.comment ?? '');
+
+    function handleSubmitReview(): void {
+        router.post(
+            storeReview.url(booking.id),
+            { rating, comment },
+            { onSuccess: () => setShowReviewModal(false) }
+        );
+    }
 
     function handleConfirm(): void {
         router.post(confirm.url(booking.id));
@@ -339,6 +353,16 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                                     View Attendance
                                 </Link>
 
+                                {isStudent && completedSessions.length > 0 && (
+                                    <button
+                                        onClick={() => setShowReviewModal(true)}
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-200 px-4 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50"
+                                    >
+                                        <Star className="h-4 w-4" />
+                                        {existingReview ? 'Edit Your Review' : 'Rate This Tutor'}
+                                    </button>
+                                )}
+
                                 {isTutor && booking.status === 'confirmed' && (
                                     <button
                                         onClick={() => {
@@ -419,6 +443,52 @@ export default function BookingShow({ booking, dayOptions }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* ── Review modal ── */}
+            {showReviewModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                        <h3 className="mb-1 text-lg font-semibold text-gray-900">Rate this course</h3>
+                        <p className="mb-4 text-sm text-gray-500">
+                            How was {booking.course.title} with {booking.course.tutor_profile.full_name}?
+                        </p>
+
+                        <div className="mb-4 flex justify-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button key={star} onClick={() => setRating(star)}>
+                                    <Star
+                                        className={`h-8 w-8 ${star <= rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+
+                        <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Share your experience (optional)"
+                            rows={3}
+                            className="mb-4 w-full rounded-xl border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                        />
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowReviewModal(false)}
+                                className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitReview}
+                                disabled={rating === 0}
+                                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                            >
+                                Submit Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Cancel modal ── */}
             {showCancelModal && (

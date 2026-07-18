@@ -58,4 +58,9 @@ class TutorProfile extends Model
     {
         return $this->hasMany(Assignment::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(TutorReview::class);
+    }
 }
