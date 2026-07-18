@@ -16,9 +16,17 @@ class LandingController extends Controller
     {
         $featuredCourses = Course::with(['subject', 'tutorProfile'])
             ->where('is_active', true)
-            ->latest()
-            ->take(6)
+            ->whereHas('tutorProfile', fn ($q) => $q->where('is_verified', true))
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->get()
+            ->sortByDesc(function ($course) {
+                $rating = (float) ($course->reviews_avg_rating ?? 0);
+                $reviews = (int) $course->reviews_count;
+                return ($rating * $reviews) / ($reviews + 5);
+            })
+            ->take(6)
+            ->values()
             ->map(fn ($course) => [
                 'id'                => $course->id,
                 'title'             => $course->title,
@@ -30,6 +38,8 @@ class LandingController extends Controller
                 'price_per_session' => $course->price_per_session,
                 'price_monthly'     => $course->price_monthly,
                 'is_group'          => $course->is_group,
+                'rating'            => $course->reviews_avg_rating ? round((float) $course->reviews_avg_rating, 1) : null,
+                'reviews_count'     => $course->reviews_count,
             ]);
 
         $stats = [

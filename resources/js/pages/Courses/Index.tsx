@@ -1,8 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { index, create, show } from '@/actions/App/Http/Controllers/CourseController';
 import EmptyState from '@/components/empty-state';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight as ChevronRightIcon, Star } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -34,6 +34,8 @@ interface Course {
     tutor_profile: TutorProfile;
     subject: Subject;
     thumbnail_url: string | null;
+    reviews_avg_rating: string | null;
+    reviews_count: number;
 }
 
 interface PaginationLink {
@@ -53,6 +55,7 @@ interface CoursesPage {
 
 interface Props {
     courses: CoursesPage;
+    featured: Course[];
     subjects: Subject[];
     filters: Record<string, string>;
     gradeOptions: Record<string, string>;
@@ -64,6 +67,7 @@ interface Props {
 
 export default function CoursesIndex({
     courses,
+    featured,
     subjects,
     filters,
     gradeOptions,
@@ -102,8 +106,6 @@ export default function CoursesIndex({
             <Head title="Courses" />
 
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-                {/* ── Header ── */}
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -124,11 +126,12 @@ export default function CoursesIndex({
                     )}
                 </div>
 
-                {/* ── Filters ── */}
+                {featured.length > 0 && (
+                    <FeaturedCarousel featured={featured} syllabusOptions={syllabusOptions} />
+                )}
+
                 <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <form onSubmit={submitSearch} className="flex flex-wrap gap-3">
-
-                        {/* Search */}
                         <div className="flex min-w-[200px] flex-1 items-center gap-2">
                             <input
                                 type="text"
@@ -145,7 +148,6 @@ export default function CoursesIndex({
                             </button>
                         </div>
 
-                        {/* Syllabus */}
                         <select
                             value={filters.syllabus ?? ''}
                             onChange={(e) => applyFilter('syllabus', e.target.value)}
@@ -157,7 +159,6 @@ export default function CoursesIndex({
                             ))}
                         </select>
 
-                        {/* Medium */}
                         <select
                             value={filters.medium ?? ''}
                             onChange={(e) => applyFilter('medium', e.target.value)}
@@ -169,7 +170,6 @@ export default function CoursesIndex({
                             ))}
                         </select>
 
-                        {/* Grade */}
                         <select
                             value={filters.grade ?? ''}
                             onChange={(e) => applyFilter('grade', e.target.value)}
@@ -181,7 +181,6 @@ export default function CoursesIndex({
                             ))}
                         </select>
 
-                        {/* Subject */}
                         <select
                             value={filters.subject_id ?? ''}
                             onChange={(e) => applyFilter('subject_id', e.target.value)}
@@ -193,7 +192,6 @@ export default function CoursesIndex({
                             ))}
                         </select>
 
-                        {/* Clear */}
                         {hasActiveFilters && (
                             <button
                                 type="button"
@@ -206,7 +204,6 @@ export default function CoursesIndex({
                     </form>
                 </div>
 
-                {/* ── Grid ── */}
                 {courses.data.length === 0 ? (
                     <EmptyState
                         icon={BookOpen}
@@ -236,7 +233,6 @@ export default function CoursesIndex({
                     </div>
                 )}
 
-                {/* ── Pagination ── */}
                 {courses.last_page > 1 && (
                     <div className="mt-8 flex justify-center gap-1">
                         {courses.links.map((link, i) => (
@@ -264,7 +260,6 @@ export default function CoursesIndex({
 }
 
 // ── Course Card ───────────────────────────────────────────────────────
-// Defined in same file — no require(), imports are at module top level.
 
 function CourseCard({
     course,
@@ -280,10 +275,8 @@ function CourseCard({
     return (
         <Link
             href={show.url(course.id)}
-            className="group flex flex-col rounded-2xl border border-gray-100 bg-white
-                       shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+            className="group flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
         >
-            {/* Card header */}
             {course.thumbnail_url ? (
                 <img
                     src={course.thumbnail_url}
@@ -308,7 +301,6 @@ function CourseCard({
                 </h3>
             </div>
 
-            {/* Card body */}
             <div className="px-5 py-4 flex flex-col flex-1">
                 <p className="text-sm text-gray-500 mb-3">by {course.tutor_profile.full_name}</p>
 
@@ -339,6 +331,113 @@ function CourseCard({
                     )}
                     {!course.price_per_session && !course.price_monthly && (
                         <p className="text-xs text-gray-400">Contact for pricing</p>
+                    )}
+                </div>
+            </div>
+        </Link>
+    );
+}
+
+// ── Featured Carousel ────────────────────────────────────────────────
+
+function FeaturedCarousel({
+    featured,
+    syllabusOptions,
+}: {
+    featured: Course[];
+    syllabusOptions: Record<string, string>;
+}) {
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    function scroll(direction: 'left' | 'right'): void {
+        scrollRef.current?.scrollBy({ left: direction === 'left' ? -280 : 280, behavior: 'smooth' });
+    }
+
+    return (
+        <div className="mb-10 -mx-4 sm:-mx-6 lg:-mx-8 rounded-2xl bg-gradient-to-br from-[#e8dcc4] to-[#faf6ee] px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mb-4 flex items-center justify-between">
+                <div>
+                    <h2 className="text-lg font-bold text-emerald-900">Featured Courses</h2>
+                    <p className="text-sm text-amber-700">Top-rated tutors on Ulama</p>
+                </div>
+                {featured.length > 3 && (
+                    <div className="hidden gap-2 sm:flex">
+                        <button
+                            onClick={() => scroll('left')}
+                            className="rounded-full bg-white p-2 text-emerald-800 shadow-sm hover:bg-emerald-50"
+                        >
+                            <ChevronLeft className="size-4" />
+                        </button>
+                        <button
+                            onClick={() => scroll('right')}
+                            className="rounded-full bg-white p-2 text-emerald-800 shadow-sm hover:bg-emerald-50"
+                        >
+                            <ChevronRightIcon className="size-4" />
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <div
+                ref={scrollRef}
+                className="flex gap-4 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+                {featured.map((course) => (
+                    <FeaturedCourseCard key={course.id} course={course} syllabusOptions={syllabusOptions} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function FeaturedCourseCard({
+    course,
+    syllabusOptions,
+}: {
+    course: Course;
+    syllabusOptions: Record<string, string>;
+}) {
+    return (
+        <Link
+            href={show.url(course.id)}
+            className="group flex w-64 shrink-0 snap-start flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-amber-100 transition-shadow hover:shadow-md"
+        >
+            <div className="relative h-40 w-full overflow-hidden">
+                {course.thumbnail_url ? (
+                    <img
+                        src={course.thumbnail_url}
+                        alt={course.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-emerald-700 to-emerald-900" />
+                )}
+                <span className="absolute top-3 left-3 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-amber-950 shadow-sm">
+                    Featured
+                </span>
+                {course.reviews_avg_rating && Number(course.reviews_count) > 0 && (
+                    <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                        <Star className="size-3 fill-amber-400 text-amber-400" />
+                        {Number(course.reviews_avg_rating).toFixed(1)}
+                        <span className="font-normal text-white/70">({course.reviews_count})</span>
+                    </span>
+                )}
+            </div>
+
+            <div className="flex flex-col gap-2 px-4 py-3.5">
+                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                    {course.subject.name} · {syllabusOptions[course.syllabus] ?? course.syllabus}
+                </span>
+                <h3 className="font-bold text-gray-900 leading-snug line-clamp-2">
+                    {course.title}
+                </h3>
+                <div className="mt-1 flex items-center justify-between border-t border-amber-50 pt-2.5">
+                    <p className="text-xs text-gray-500">by {course.tutor_profile.full_name}</p>
+                    {course.price_per_session && (
+                        <p className="text-sm font-bold text-emerald-700">
+                            LKR {Number(course.price_per_session).toLocaleString('en-LK')}
+                            <span className="text-xs font-normal text-gray-400">/session</span>
+                        </p>
                     )}
                 </div>
             </div>

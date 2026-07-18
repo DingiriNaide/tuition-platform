@@ -49,6 +49,24 @@ class CourseController extends Controller
 
         $paginator = $query->paginate(12)->withQueryString();
 
+        $hasActiveFilters = $request->anyFilled(['syllabus', 'medium', 'grade', 'subject_id', 'search']);
+
+        $featured = $hasActiveFilters
+            ? []
+            : Course::with(['tutorProfile', 'subject'])
+                ->where('is_active', true)
+                ->whereHas('tutorProfile', fn ($q) => $q->where('is_verified', true))
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews')
+                ->get()
+                ->sortByDesc(function ($course) {
+                    $rating = (float) ($course->reviews_avg_rating ?? 0);
+                    $reviews = (int) $course->reviews_count;
+                    return ($rating * $reviews) / ($reviews + 5);
+                })
+                ->take(8)
+                ->values();
+
         return Inertia::render('Courses/Index', [
             'courses' => [
                 'data'         => $paginator->items(),
@@ -58,6 +76,7 @@ class CourseController extends Controller
                 'last_page'    => $paginator->lastPage(),
                 'links'        => $paginator->linkCollection()->toArray(),
             ],
+            'featured'        => $featured,
             'subjects'        => Subject::active()->orderBy('name')->get(['id', 'name', 'name_sinhala', 'name_tamil', 'syllabus']),
             'filters'         => $request->only(['syllabus', 'medium', 'grade', 'subject_id', 'search']),
             'gradeOptions'    => Course::gradeOptions(),
@@ -151,10 +170,26 @@ class CourseController extends Controller
 
         $canManage = $tutorProfile && $tutorProfile->id === $course->tutor_profile_id;
 
-        // Admins can also manage
         if ($user && $user->hasAnyRole(['admin', 'super-admin'])) {
             $canManage = true;
         }
+
+        $reviews = $course->reviews()
+            ->with('studentProfile:id,full_name')
+            ->latest()
+            ->get()
+            ->map(fn ($review) => [
+                'id'           => $review->id,
+                'rating'       => $review->rating,
+                'comment'      => $review->comment,
+                'student_name' => $review->studentProfile->full_name,
+                'created_at'   => $review->created_at->format('M j, Y'),
+            ]);
+
+        $reviewStats = [
+            'average' => $reviews->count() > 0 ? round($reviews->avg('rating'), 1) : null,
+            'count'   => $reviews->count(),
+        ];
 
         return Inertia::render('Courses/Show', [
             'course'          => $course,
@@ -162,6 +197,8 @@ class CourseController extends Controller
             'gradeOptions'    => Course::gradeOptions(),
             'syllabusOptions' => Course::syllabusOptions(),
             'mediumOptions'   => Course::mediumOptions(),
+            'reviews'         => $reviews,
+            'reviewStats'     => $reviewStats,
         ]);
     }
 
