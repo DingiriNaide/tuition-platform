@@ -47,6 +47,21 @@ interface Props {
     gradeOptions: Record<string, string>;
     syllabusOptions: Record<string, string>;
     mediumOptions: Record<string, string>;
+    reviews: Review[];
+    reviewStats: ReviewStats;
+}
+
+interface Review {
+    id: number;
+    rating: number;
+    comment: string | null;
+    student_name: string;
+    created_at: string;
+}
+
+interface ReviewStats {
+    average: number | null;
+    count: number;
 }
 
 interface AuthUser {
@@ -62,6 +77,8 @@ export default function CourseShow({
     gradeOptions,
     syllabusOptions,
     mediumOptions,
+    reviews,
+    reviewStats,
 }: Props) {
     const { auth } = usePage<{ auth: { user: AuthUser | null } }>().props;
 
@@ -246,6 +263,64 @@ export default function CourseShow({
                                     value={course.is_active ? 'Active' : 'Inactive'}
                                 />
                             </dl>
+                        </section>
+
+                        {/* Reviews */}
+                        <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                                    Student Reviews
+                                </h2>
+                                {reviewStats.average !== null && (
+                                    <div className="flex items-center gap-1.5">
+                                        <Star className="size-4 fill-amber-400 text-amber-400" />
+                                        <span className="font-semibold text-gray-900 dark:text-white">
+                                            {reviewStats.average.toFixed(1)}
+                                        </span>
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                            ({reviewStats.count} review{reviewStats.count !== 1 ? 's' : ''})
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {reviews.length === 0 ? (
+                                <p className="text-sm text-gray-400 dark:text-gray-500">
+                                    No reviews yet for this course.
+                                </p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {reviews.map((review) => (
+                                        <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0 dark:border-gray-700">
+                                            <div className="mb-1 flex items-center justify-between">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {review.student_name}
+                                                </p>
+                                                <span className="text-xs text-gray-400 dark:text-gray-500">
+                                                    {review.created_at}
+                                                </span>
+                                            </div>
+                                            <div className="mb-1.5 flex items-center gap-0.5">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <Star
+                                                        key={star}
+                                                        className={`size-3.5 ${
+                                                            star <= review.rating
+                                                                ? 'fill-amber-400 text-amber-400'
+                                                                : 'text-gray-200 dark:text-gray-600'
+                                                        }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            {review.comment && (
+                                                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                                                    {review.comment}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </section>
                     </div>
 
