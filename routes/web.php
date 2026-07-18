@@ -15,20 +15,27 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\LiveSessionController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\TutorEarningsController;
+use App\Http\Controllers\TutorReviewController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
 
+// ── Courses (fully public — browsable without login) ──────────────
+Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // ── Courses (tutor create form — still requires auth) ──────────────
+    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
+});
+
+Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // ── Courses (public within auth) ──────────────────────────────────
-    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
-    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
     // ── Courses (tutor/admin only) ────────────────────────────────────
     Route::middleware('role:tutor|admin|super-admin')->group(function () {
@@ -36,7 +43,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
         Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
         Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
-        Route::get('/tutor/earnings', [TutorEarningsController::class, 'index'])->name('tutor.earnings');
     });
 
     // ── Schedules (tutor/admin only) ──────────────────────────────────
@@ -57,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
         Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
         Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('bookings/{booking}/review', [TutorReviewController::class, 'store'])->name('reviews.store');
     });
 
     // ── Booking detail (all roles) ────────────────────────────────────
