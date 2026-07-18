@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { BookOpen, Users, GraduationCap, ChevronRight, Star } from 'lucide-react';
 import { login, register } from '@/routes';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import AppLogoIcon from '@/components/app-logo-icon';
 
 interface Course {
@@ -63,10 +64,19 @@ export default function Landing({ featuredCourses, stats }: Props) {
             </nav>
 
             {/* Hero */}
-            <section className="pt-32 pb-20 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800">
-                <div className="max-w-6xl mx-auto px-6 text-center">
+            <section className="relative pt-32 pb-20 overflow-hidden">
+                {/* Background image */}
+                <img
+                    src="/images/hero-illustration.jpeg"
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover object-left"
+                />
+                {/* Gradient overlay — heavier than the auth page since this photo is busier */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/55 via-emerald-900/90 to-emerald-800/85" />
+
+                <div className="relative max-w-6xl mx-auto px-6 text-center">
                     <span className="inline-block bg-emerald-700/50 text-emerald-200 text-xs font-semibold
-                                     px-3 py-1 rounded-full mb-6 tracking-wider uppercase">
+                                    px-3 py-1 rounded-full mb-6 tracking-wider uppercase">
                         Sri Lanka's #1 Tutoring Platform
                     </span>
                     <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
@@ -80,13 +90,13 @@ export default function Landing({ featuredCourses, stats }: Props) {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href={register()}
                             className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400
-                                       text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
+                                    text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
                             Start Learning Free
                             <ChevronRight className="size-4" />
                         </Link>
                         <Link href="#courses"
                             className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20
-                                       text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
+                                    text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
                             Browse Courses
                         </Link>
                     </div>
@@ -151,9 +161,8 @@ export default function Landing({ featuredCourses, stats }: Props) {
                             <h2 className="text-3xl font-bold text-gray-900">Featured Courses</h2>
                             <p className="text-gray-500 mt-2">Explore our most popular tutoring sessions</p>
                         </div>
-                        <Link href={register()}
-                            className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold
-                                       flex items-center gap-1">
+                        <Link href={coursesIndex.url()}
+                            className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1">
                             View all <ChevronRight className="size-4" />
                         </Link>
                     </div>
