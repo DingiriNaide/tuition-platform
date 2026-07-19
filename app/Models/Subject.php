@@ -22,5 +22,9 @@ class Subject extends Model
     {
         return $query->where('is_active', true);
     }
-
+    
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
 }

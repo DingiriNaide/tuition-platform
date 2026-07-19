@@ -19,9 +19,23 @@ class CourseController extends Controller
 
     public function index(Request $request): Response
     {
-        $query = Course::with(['tutorProfile', 'subject'])
-            ->active()
-            ->latest();
+        $user = Auth::user();
+        $tutorProfile = $user ? TutorProfile::where('user_id', $user->id)->first() : null;
+        $studentProfile = $user ? \App\Models\StudentProfile::where('user_id', $user->id)->first() : null;
+
+        $query = Course::with(['tutorProfile', 'subject'])->latest();
+
+        $showMine = $request->boolean('mine');
+
+        if ($showMine && $tutorProfile) {
+            $query->where('tutor_profile_id', $tutorProfile->id);
+        } elseif ($showMine && $studentProfile) {
+            $query->whereHas('bookings', fn ($q) => $q
+                ->where('student_profile_id', $studentProfile->id)
+                ->whereIn('status', ['pending', 'confirmed', 'completed']));
+        } else {
+            $query->active();
+        }
 
         if ($request->filled('syllabus')) {
             $query->where('syllabus', $request->syllabus);
@@ -77,6 +91,8 @@ class CourseController extends Controller
                 'links'        => $paginator->linkCollection()->toArray(),
             ],
             'featured'        => $featured,
+            'showingMine'     => $showMine,
+            'canFilterMine'   => (bool) ($tutorProfile || $studentProfile),
             'subjects'        => Subject::active()->orderBy('name')->get(['id', 'name', 'name_sinhala', 'name_tamil', 'syllabus']),
             'filters'         => $request->only(['syllabus', 'medium', 'grade', 'subject_id', 'search']),
             'gradeOptions'    => Course::gradeOptions(),

@@ -49,7 +49,7 @@ export default function SchedulesIndex({ schedules, dayOptions }: Props) {
                     </h1>
                     <Link
                         href={create.url()}
-                        className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                        className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
                     >
                         + Add Schedule
                     </Link>
@@ -183,7 +183,7 @@ function EmptyState() {
             </p>
             <Link
                 href={create.url()}
-                className="mt-3 inline-block text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                className="mt-3 inline-block text-sm text-emerald-600 hover:underline dark:text-emerald-400"
             >
                 Add schedule →
             </Link>

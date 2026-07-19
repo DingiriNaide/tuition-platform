@@ -61,6 +61,8 @@ interface Props {
     gradeOptions: Record<string, string>;
     syllabusOptions: Record<string, string>;
     mediumOptions: Record<string, string>;
+    showingMine: boolean;
+    canFilterMine: boolean;
 }
 
 // ── Page component ────────────────────────────────────────────────────
@@ -73,6 +75,8 @@ export default function CoursesIndex({
     gradeOptions,
     syllabusOptions,
     mediumOptions,
+    showingMine,
+    canFilterMine
 }: Props) {
     const { auth } = usePage<{
         auth: { user: { roles: string[] } | null };
@@ -125,6 +129,27 @@ export default function CoursesIndex({
                         </Link>
                     )}
                 </div>
+
+                {canFilterMine && (
+                    <div className="mb-4 inline-flex rounded-xl border border-gray-200 p-1">
+                        <button
+                            onClick={() => router.get(index.url(), { ...filters }, { preserveState: true })}
+                            className={`rounded-lg px-4 py-1.5 text-sm font-medium ${
+                                !showingMine ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            All Courses
+                        </button>
+                        <button
+                            onClick={() => router.get(index.url(), { ...filters, mine: 1 }, { preserveState: true })}
+                            className={`rounded-lg px-4 py-1.5 text-sm font-medium ${
+                                showingMine ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            My Courses
+                        </button>
+                    </div>
+                )}
 
                 {featured.length > 0 && (
                     <FeaturedCarousel featured={featured} syllabusOptions={syllabusOptions} />

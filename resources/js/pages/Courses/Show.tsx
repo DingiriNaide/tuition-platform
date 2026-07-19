@@ -368,7 +368,7 @@ export default function CourseShow({
                                 // Student: link to booking form pre-filled with this course
                                 <Link
                                     href={`${createBooking.url()}?course_id=${course.id}`}
-                                    className="mt-4 block w-full rounded-md bg-indigo-600 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                    className="mt-4 block w-full rounded-md bg-emerald-600 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                                 >
                                     Book a Session
                                 </Link>

@@ -4,7 +4,8 @@ import {
     LayoutGrid, BookOpen, CalendarDays, CheckSquare,
     BarChart2, CreditCard, GraduationCap, Users,
     ShieldCheck, Ticket, FileText, DollarSign,
-    Menu, X, ChevronDown, LogOut, Settings, User
+    Menu, X, ChevronDown, LogOut, Settings, User,
+    BookOpenCheck
 } from 'lucide-react';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
@@ -26,7 +27,7 @@ const studentNav: NavItem[] = [
 
 const tutorNav: NavItem[] = [
     { title: 'Dashboard',        href: dashboard(),         icon: LayoutGrid  },
-    { title: 'My Courses',       href: '/courses',          icon: BookOpen    },
+    { title: 'All Courses',       href: '/courses',          icon: BookOpen   },
     { title: 'Bookings',         href: '/tutor/bookings',   icon: CalendarDays},
     { title: 'Schedules',        href: '/schedules',        icon: CalendarDays},
     { title: 'Progress Reports', href: '/progress-reports', icon: FileText    },
@@ -34,11 +35,12 @@ const tutorNav: NavItem[] = [
 ];
 
 const adminNav: NavItem[] = [
-    { title: 'Dashboard',          href: dashboard(),       icon: LayoutGrid  },
-    { title: 'Tutor Verification', href: '/admin/tutors',   icon: ShieldCheck },
-    { title: 'Vouchers',           href: '/admin/vouchers', icon: Ticket      },
-    { title: 'Courses',            href: '/courses',        icon: BookOpen    },
-    { title: 'Payments',           href: '/admin/payments', icon: CreditCard  },
+    { title: 'Dashboard',          href: dashboard(),       icon: LayoutGrid    },
+    { title: 'Tutor Verification', href: '/admin/tutors',   icon: ShieldCheck   },
+    { title: 'Manage Subjects',    href: '/admin/subjects', icon: BookOpenCheck },
+    { title: 'Vouchers',           href: '/admin/vouchers', icon: Ticket        },
+    { title: 'Courses',            href: '/courses',        icon: BookOpen      },
+    { title: 'Payments',           href: '/admin/payments', icon: CreditCard    },
 ];
 
 const parentNav: NavItem[] = [

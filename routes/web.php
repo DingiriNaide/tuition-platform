@@ -17,6 +17,7 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\TutorEarningsController;
 use App\Http\Controllers\TutorReviewController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,7 @@ Route::get('/courses', [CourseController::class, 'index'])->name('courses.index'
 Route::middleware(['auth', 'verified'])->group(function () {
     // ── Courses (tutor create form — still requires auth) ──────────────
     Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
+    Route::get('/tutor/earnings', [TutorEarningsController::class, 'index'])->name('tutor.earnings');
 });
 
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
@@ -105,6 +107,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/', [ParentProfileController::class, 'update'])->name('update');
     });
 
+});
+
+// ── Admin: manage subjects ────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:admin|super-admin'])->group(function (): void {
+    Route::get('/admin/subjects', [SubjectController::class, 'index'])->name('admin.subjects.index');
+    Route::post('/admin/subjects', [SubjectController::class, 'store'])->name('admin.subjects.store');
+    Route::put('/admin/subjects/{subject}', [SubjectController::class, 'update'])->name('admin.subjects.update');
+    Route::post('/admin/subjects/{subject}/toggle', [SubjectController::class, 'toggle'])->name('admin.subjects.toggle');
+    Route::delete('/admin/subjects/{subject}', [SubjectController::class, 'destroy'])->name('admin.subjects.destroy');
 });
 
 // ── Attendance ────────────────────────────────────────────────────────
