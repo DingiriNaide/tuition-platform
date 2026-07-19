@@ -1,4 +1,4 @@
-import Echo from 'laravel-echo';
+/* import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 declare global {
@@ -21,6 +21,34 @@ if (typeof window !== 'undefined') {
         wssPort:          import.meta.env.VITE_REVERB_PORT ?? 443,
         forceTLS:         (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
         enabledTransports:['ws', 'wss'],
+    });
+
+    echoInstance = window.Echo;
+}
+
+export default echoInstance;
+ */
+
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+declare global {
+    interface Window {
+        Pusher: typeof Pusher;
+        Echo: Echo<'pusher'>;
+    }
+}
+
+let echoInstance: Echo<'pusher'> | null = null;
+
+if (typeof window !== 'undefined') {
+    window.Pusher = Pusher;
+
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key:         import.meta.env.VITE_PUSHER_APP_KEY,
+        cluster:     import.meta.env.VITE_PUSHER_APP_CLUSTER,
+        forceTLS:    true,
     });
 
     echoInstance = window.Echo;
