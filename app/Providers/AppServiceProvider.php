@@ -2,13 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\TutorReview;
+use App\Observers\TutorReviewObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules\Password;
-use App\Models\TutorReview;
-use App\Observers\TutorReviewObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
         $this->configureDefaults();
         TutorReview::observe(TutorReviewObserver::class);
     }
