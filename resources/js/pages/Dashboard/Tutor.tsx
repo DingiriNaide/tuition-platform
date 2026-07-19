@@ -162,7 +162,7 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                     <div className="grid grid-cols-2 gap-3">
                         {[
                             { title: 'Create Course',    desc: 'List a new course for students',    href: createCourse.url(),  icon: PlusCircle  },
-                            { title: 'My Courses',       desc: 'View and manage your courses',      href: index.url(),         icon: BookOpen    },
+                            { title: 'My Courses',       desc: 'View and manage your courses',      href: `${index.url()}?mine=1`,         icon: BookOpen    },
                             { title: 'View Earnings',    desc: 'Check your payment history',        href: paymentsIndex.url(), icon: DollarSign  },
                             { title: 'Schedule Class',   desc: 'Set up an upcoming session',        href: '/schedules/create', icon: CalendarDays},
                         ].map(({ title, desc, href, icon: Icon }) => (
