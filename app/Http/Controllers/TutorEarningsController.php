@@ -46,7 +46,7 @@ class TutorEarningsController extends Controller
 
         // Last 6 months trend, for a simple chart
         $monthlyTrend = TutorPayout::where('tutor_profile_id', $tutorProfile->id)
-            ->selectRaw("strftime('%Y-%m', created_at) as month, SUM(net_amount) as total")
+            ->selectRaw("to_char(created_at, 'YYYY-MM') as month, SUM(net_amount) as total")
             ->where('created_at', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month')
