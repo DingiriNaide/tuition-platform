@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
     unzip git curl ca-certificates gnupg \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_pgsql pgsql zip gd
+    && docker-php-ext-install pdo pdo_pgsql pgsql zip gd bcmath exif
 
 # ── Node.js 20 (via NodeSource, since this is Debian not Alpine) ──
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
