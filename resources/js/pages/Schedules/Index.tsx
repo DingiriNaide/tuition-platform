@@ -62,7 +62,7 @@ export default function SchedulesIndex({ schedules, dayOptions }: Props) {
                         icon={CalendarDays}
                         title="No schedules yet"
                         description="You haven't added any availability slots yet. Add your first schedule to start receiving bookings."
-                        action={{ label: 'Add schedule →', href: create.url() }}
+                        action={{ label: 'Add schedule', href: create.url() }}
                     />
                 ) : (
                     <div className="space-y-8">
