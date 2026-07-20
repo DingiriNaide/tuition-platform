@@ -35,15 +35,29 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user() ? array_merge($request->user()->toArray(), [
-                    'roles' => $request->user()->getRoleNames(),
+                'user' => $user ? array_merge($user->toArray(), [
+                    'roles'      => $user->getRoleNames(),
+                    'avatar_url' => $this->resolveAvatarUrl($user),
                 ]) : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    /**
+     * Resolve the avatar URL from whichever profile the user has.
+     */
+    private function resolveAvatarUrl($user): ?string
+    {
+        return $user->tutorProfile?->avatar_url
+            ?? $user->studentProfile?->avatar_url
+            ?? $user->parentProfile?->avatar_url
+            ?? null;
     }
 }

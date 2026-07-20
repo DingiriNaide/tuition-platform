@@ -1,3 +1,4 @@
+// show.tsx
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -28,6 +29,7 @@ interface TutorProfile {
     rating: number;
     total_reviews: number;
     created_at: string;
+    avatar_url: string | null;
     user: User;
     subjects: Subject[];
 }
@@ -75,9 +77,24 @@ export default function Show({ tutor }: Props) {
                 </div>
 
                 <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-2xl font-semibold">{tutor.full_name}</h1>
-                        <p className="text-gray-500 text-sm mt-1">{tutor.user.email}</p>
+                    <div className="flex items-center gap-4">
+                        {tutor.avatar_url ? (
+                            <img
+                                src={tutor.avatar_url}
+                                alt={tutor.full_name}
+                                className="size-14 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="size-14 rounded-full bg-emerald-600 flex items-center justify-center">
+                                <span className="text-white text-lg font-bold">
+                                    {tutor.full_name?.charAt(0).toUpperCase() ?? '?'}
+                                </span>
+                            </div>
+                        )}
+                        <div>
+                            <h1 className="text-2xl font-semibold">{tutor.full_name}</h1>
+                            <p className="text-gray-500 text-sm mt-1">{tutor.user.email}</p>
+                        </div>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${tutor.is_verified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                         {tutor.is_verified ? 'Verified' : 'Pending Verification'}

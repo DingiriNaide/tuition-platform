@@ -1,5 +1,5 @@
 import { useForm, Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { useState } from 'react';
 import { update, show } from '@/actions/App/Http/Controllers/ProfileController/ParentProfileController';
 
 interface ParentProfile {
@@ -8,6 +8,7 @@ interface ParentProfile {
     phone: string;
     district: string;
     city: string;
+    avatar_url: string | null;
 }
 
 interface Props {
@@ -15,24 +16,59 @@ interface Props {
 }
 
 export default function Edit({ profile }: Props) {
-    const { data, setData, put, processing, errors } = useForm({
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url ?? null);
+
+    const { data, setData, post, processing, errors } = useForm({
         full_name: profile.full_name ?? '',
         phone: profile.phone ?? '',
         district: profile.district ?? '',
         city: profile.city ?? '',
+        avatar: null as File | null,
+        _method: 'put',
     });
+
+    function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        setData('avatar', file);
+
+        if (file) {
+            setAvatarPreview(URL.createObjectURL(file));
+        }
+    }
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        put(update.url());
+        post(update.url(), { forceFormData: true });
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Edit Parent Profile" />
             <div className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-semibold mb-6">Edit Parent Profile</h1>
                 <form onSubmit={submit} className="space-y-4">
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Avatar</label>
+                        <div className="flex items-center gap-4">
+                            <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center shrink-0">
+                                {avatarPreview ? (
+                                    <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
+                                ) : (
+                                    <span className="text-lg font-semibold text-gray-500">
+                                        {profile.full_name?.charAt(0).toUpperCase() ?? '?'}
+                                    </span>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                accept="image/png,image/jpeg"
+                                onChange={handleAvatarChange}
+                                className="text-sm"
+                            />
+                        </div>
+                        {errors.avatar && <p className="text-red-500 text-sm mt-1">{errors.avatar}</p>}
+                    </div>
 
                     <div>
                         <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -83,7 +119,7 @@ export default function Edit({ profile }: Props) {
                         >
                             {processing ? 'Saving...' : 'Update Profile'}
                         </button>
-                        
+
                         <Link
                             href={show.url()}
                             className="flex-1 text-center border py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -94,6 +130,6 @@ export default function Edit({ profile }: Props) {
 
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }

@@ -1,5 +1,4 @@
 import { useForm, Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { store } from '@/actions/App/Http/Controllers/ProfileController/ParentProfileController';
 
 export default function Create() {
@@ -17,7 +16,7 @@ export default function Create() {
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Create Parent Profile" />
             <div className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-semibold mb-6">Create Parent Profile</h1>
@@ -74,6 +73,6 @@ export default function Create() {
 
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }

@@ -1,9 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
+import EmptyState from '@/components/empty-state';
 import {
     create,
     edit,
     destroy,
 } from '@/actions/App/Http/Controllers/ScheduleController';
+import { CalendarDays } from 'lucide-react';
 
 interface Course {
     id: number;
@@ -56,7 +58,12 @@ export default function SchedulesIndex({ schedules, dayOptions }: Props) {
                 </div>
 
                 {schedules.length === 0 ? (
-                    <EmptyState />
+                    <EmptyState
+                        icon={CalendarDays}
+                        title="No schedules yet"
+                        description="You haven't added any availability slots yet. Add your first schedule to start receiving bookings."
+                        action={{ label: 'Add schedule →', href: create.url() }}
+                    />
                 ) : (
                     <div className="space-y-8">
                         {active.length > 0 && (
@@ -171,22 +178,6 @@ function ScheduleGroup({
                     </tbody>
                 </table>
             </div>
-        </div>
-    );
-}
-
-function EmptyState() {
-    return (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600">
-            <p className="text-gray-500 dark:text-gray-400">
-                No schedules yet. Add your first availability slot.
-            </p>
-            <Link
-                href={create.url()}
-                className="mt-3 inline-block text-sm text-emerald-600 hover:underline dark:text-emerald-400"
-            >
-                Add schedule →
-            </Link>
         </div>
     );
 }

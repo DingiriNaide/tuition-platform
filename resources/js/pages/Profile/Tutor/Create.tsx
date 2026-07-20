@@ -1,5 +1,4 @@
 import { useForm, Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { store } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
 
 interface Subject {
@@ -44,7 +43,7 @@ export default function Create({ subjects }: Props) {
     const foundationSubjects = subjects.filter(s => s.syllabus === 'foundation');
 
     return (
-        <AppLayout>
+        <>
             <Head title="Create Tutor Profile" />
             <div className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-semibold mb-6">Create Tutor Profile</h1>
@@ -204,6 +203,6 @@ export default function Create({ subjects }: Props) {
 
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }

@@ -9,7 +9,10 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { configureEcho } from '@laravel/echo-react';
 
 configureEcho({
-    broadcaster: 'reverb',
+    broadcaster: 'pusher',
+    key: import.meta.env.VITE_PUSHER_APP_KEY,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    forceTLS: true,
 });
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -18,6 +21,7 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         if (name === 'landing' || name === 'welcome') return null;
+        if (name === 'LiveSession/Room') return null;
         if (name.startsWith('auth/')) return AuthLayout;
         if (name.startsWith('settings/')) return [AppLayout, SettingsLayout];
         if (name === 'error') return null;

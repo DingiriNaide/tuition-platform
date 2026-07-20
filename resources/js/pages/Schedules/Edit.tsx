@@ -1,4 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/ScheduleController';
 import { index } from '@/actions/App/Http/Controllers/ScheduleController';
@@ -61,7 +60,7 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
     }
 
     return (
-        <AppLayout>
+        <>
             <Head title="Edit Schedule" />
 
             <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
@@ -232,7 +231,7 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
 

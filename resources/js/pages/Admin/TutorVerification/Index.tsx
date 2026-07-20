@@ -1,3 +1,4 @@
+// index.tsx
 import { Head, Link, router } from '@inertiajs/react';
 
 interface Subject {
@@ -25,6 +26,7 @@ interface TutorProfile {
     rating: number;
     total_reviews: number;
     created_at: string;
+    avatar_url: string | null;
     user: User;
     subjects: Subject[];
 }
@@ -61,15 +63,30 @@ export default function Index({ pending, verified }: Props) {
                         <div className="space-y-3">
                             {pending.map(tutor => (
                                 <div key={tutor.id} className="bg-white dark:bg-gray-800 rounded-lg border p-5 flex items-center justify-between gap-4">
-                                    <div className="min-w-0">
-                                        <p className="font-medium">{tutor.full_name}</p>
-                                        <p className="text-sm text-gray-500">{tutor.user.email}</p>
-                                        <div className="flex flex-wrap gap-1 mt-2">
-                                            {tutor.subjects.map(s => (
-                                                <span key={s.id} className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full">
-                                                    {s.name}
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        {tutor.avatar_url ? (
+                                            <img
+                                                src={tutor.avatar_url}
+                                                alt={tutor.full_name}
+                                                className="size-10 rounded-full object-cover shrink-0"
+                                            />
+                                        ) : (
+                                            <div className="size-10 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
+                                                <span className="text-white text-sm font-bold">
+                                                    {tutor.full_name?.charAt(0).toUpperCase() ?? '?'}
                                                 </span>
-                                            ))}
+                                            </div>
+                                        )}
+                                        <div className="min-w-0">
+                                            <p className="font-medium">{tutor.full_name}</p>
+                                            <p className="text-sm text-gray-500">{tutor.user.email}</p>
+                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                {tutor.subjects.map(s => (
+                                                    <span key={s.id} className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full">
+                                                        {s.name}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 flex-shrink-0">
@@ -104,15 +121,30 @@ export default function Index({ pending, verified }: Props) {
                         <div className="space-y-3">
                             {verified.map(tutor => (
                                 <div key={tutor.id} className="bg-white dark:bg-gray-800 rounded-lg border p-5 flex items-center justify-between gap-4">
-                                    <div className="min-w-0">
-                                        <p className="font-medium">{tutor.full_name}</p>
-                                        <p className="text-sm text-gray-500">{tutor.user.email}</p>
-                                        <div className="flex flex-wrap gap-1 mt-2">
-                                            {tutor.subjects.map(s => (
-                                                <span key={s.id} className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full">
-                                                    {s.name}
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        {tutor.avatar_url ? (
+                                            <img
+                                                src={tutor.avatar_url}
+                                                alt={tutor.full_name}
+                                                className="size-10 rounded-full object-cover shrink-0"
+                                            />
+                                        ) : (
+                                            <div className="size-10 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
+                                                <span className="text-white text-sm font-bold">
+                                                    {tutor.full_name?.charAt(0).toUpperCase() ?? '?'}
                                                 </span>
-                                            ))}
+                                            </div>
+                                        )}
+                                        <div className="min-w-0">
+                                            <p className="font-medium">{tutor.full_name}</p>
+                                            <p className="text-sm text-gray-500">{tutor.user.email}</p>
+                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                {tutor.subjects.map(s => (
+                                                    <span key={s.id} className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full">
+                                                        {s.name}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 flex-shrink-0">

@@ -135,9 +135,17 @@ export default function AppLayout({ children, breadcrumbs = [] }: Props) {
                                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                                            text-emerald-100 hover:bg-emerald-800 transition-colors"
                             >
-                                <div className="size-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
-                                    <span className="text-white text-xs font-bold">{initials}</span>
-                                </div>
+                                {user?.avatar_url ? (
+                                    <img
+                                        src={user.avatar_url}
+                                        alt={user.name}
+                                        className="size-7 rounded-full object-cover shrink-0"
+                                    />
+                                ) : (
+                                    <div className="size-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
+                                        <span className="text-white text-xs font-bold">{initials}</span>
+                                    </div>
+                                )}
                                 <div className="flex-1 text-left min-w-0">
                                     <p className="text-sm font-medium text-white truncate">{user?.name}</p>
                                     <p className="text-xs text-emerald-400 capitalize mt-0.5">{roles[0] ?? 'user'}</p>
@@ -196,9 +204,17 @@ export default function AppLayout({ children, breadcrumbs = [] }: Props) {
 
                     <div className="ml-auto flex items-center gap-3">
                         <span className="text-xs text-gray-400 hidden sm:block">{user?.email}</span>
-                        <div className="size-8 rounded-full bg-emerald-600 flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">{initials}</span>
-                        </div>
+                        {user?.avatar_url ? (
+                            <img
+                                src={user.avatar_url}
+                                alt={user.name}
+                                className="size-8 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="size-8 rounded-full bg-emerald-600 flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">{initials}</span>
+                            </div>
+                        )}
                     </div>
                 </header>
 

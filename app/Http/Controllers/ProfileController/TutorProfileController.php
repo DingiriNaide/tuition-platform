@@ -40,13 +40,19 @@ class TutorProfileController extends Controller
             'medium'      => 'required|in:sinhala,tamil,english,bilingual',
             'subjects'    => 'nullable|array',
             'subjects.*'  => 'exists:subjects,id',
+            'avatar'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $subjects = $validated['subjects'] ?? [];
         unset($validated['subjects']);
+        unset($validated['avatar']);
 
         $profile = $request->user()->tutorProfile()->create($validated);
         $profile->subjects()->sync($subjects);
+
+        if ($request->hasFile('avatar')) {
+            $profile->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+        }
 
         $request->user()->assignRole('tutor');
 
@@ -77,14 +83,20 @@ class TutorProfileController extends Controller
             'medium'      => 'required|in:sinhala,tamil,english,bilingual',
             'subjects'    => 'nullable|array',
             'subjects.*'  => 'exists:subjects,id',
+            'avatar'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $subjects = $validated['subjects'] ?? [];
         unset($validated['subjects']);
+        unset($validated['avatar']);
 
         $profile = $request->user()->tutorProfile;
         $profile->update($validated);
         $profile->subjects()->sync($subjects);
+
+        if ($request->hasFile('avatar')) {
+            $profile->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+        }
 
         return redirect()->to('/profile/tutor')
             ->with('success', 'Profile updated successfully.');
