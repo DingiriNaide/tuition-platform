@@ -10,6 +10,7 @@ import { show as showLiveSession } from '@/actions/App/Http/Controllers/LiveSess
 import { studentIndex } from '@/actions/App/Http/Controllers/AssignmentController';
 import { store as storeReview } from '@/actions/App/Http/Controllers/TutorReviewController';
 import { FileText, ClipboardCheck, ClipboardList, Video, CheckCircle2, XCircle, Star } from 'lucide-react';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface Session {
     id: number;
@@ -89,24 +90,47 @@ export default function BookingShow({ booking, dayOptions, existingReview }: Pro
     const [rating, setRating] = useState(existingReview?.rating ?? 0);
     const [comment, setComment] = useState(existingReview?.comment ?? '');
 
+    const [isConfirming, setIsConfirming]       = useState(false);
+    const [isCancelling, setIsCancelling]       = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [isStartingLive, setIsStartingLive]   = useState(false);
+
     function handleSubmitReview(): void {
+        setIsSubmittingReview(true);
         router.post(
             storeReview.url(booking.id),
             { rating, comment },
-            { onSuccess: () => setShowReviewModal(false) }
+            {
+                onSuccess: () => setShowReviewModal(false),
+                onFinish: () => setIsSubmittingReview(false),
+            }
         );
     }
 
     function handleConfirm(): void {
-        router.post(confirm.url(booking.id));
+        setIsConfirming(true);
+        router.post(confirm.url(booking.id), {}, {
+            onFinish: () => setIsConfirming(false),
+        });
     }
 
     function handleCancel(): void {
+        setIsCancelling(true);
         router.post(
             cancel.url(booking.id),
             { cancellation_reason: cancelReason },
-            { onSuccess: () => setShowCancelModal(false) },
+            {
+                onSuccess: () => setShowCancelModal(false),
+                onFinish: () => setIsCancelling(false),
+            },
         );
+    }
+
+    function handleStartLiveSession(): void {
+        setIsStartingLive(true);
+        router.post(createLiveSession.url(), { booking_id: booking.id }, {
+            onFinish: () => setIsStartingLive(false),
+        });
     }
 
     function formatDate(dateStr: string): string {
@@ -125,7 +149,10 @@ export default function BookingShow({ booking, dayOptions, existingReview }: Pro
         <>
             <Head title={`Booking #${booking.id}`} />
 
-            <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 relative">
+                <LoadingOverlay show={isConfirming} message="Confirming booking…" variant="card" />
+                <LoadingOverlay show={isCancelling} message="Cancelling booking…" variant="card" />
+                <LoadingOverlay show={isStartingLive} message="Starting live session…" variant="card" />
 
                 {/* ── Course Banner ── */}
                 {booking.course.thumbnail_url && (
@@ -365,11 +392,7 @@ export default function BookingShow({ booking, dayOptions, existingReview }: Pro
 
                                 {isTutor && booking.status === 'confirmed' && (
                                     <button
-                                        onClick={() => {
-                                            router.post(createLiveSession.url(), {
-                                                booking_id: booking.id,
-                                            });
-                                        }}
+                                        onClick={handleStartLiveSession}
                                         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
                                     >
                                         <Video className="h-4 w-4" />
@@ -447,7 +470,8 @@ export default function BookingShow({ booking, dayOptions, existingReview }: Pro
             {/* ── Review modal ── */}
             {showReviewModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl relative">
+                        <LoadingOverlay show={isSubmittingReview} message="Submitting review…" variant="card" />
                         <h3 className="mb-1 text-lg font-semibold text-gray-900">Rate this course</h3>
                         <p className="mb-4 text-sm text-gray-500">
                             How was {booking.course.title} with {booking.course.tutor_profile.full_name}?

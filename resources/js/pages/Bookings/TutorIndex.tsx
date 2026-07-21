@@ -1,7 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { show, confirm } from '@/actions/App/Http/Controllers/BookingController';
 import EmptyState from '@/components/empty-state';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Loader2 } from 'lucide-react';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 
 interface Booking {
@@ -47,8 +48,13 @@ function formatDate(dateStr: string): string {
 }
 
 export default function TutorBookingsIndex({ bookings }: Props) {
+    const [confirmingId, setConfirmingId] = useState<number | null>(null);
+
     function handleConfirm(id: number): void {
-        router.post(confirm.url(id));
+        setConfirmingId(id);
+        router.post(confirm.url(id), {}, {
+            onFinish: () => setConfirmingId(null),
+        });
     }
 
     return (
@@ -113,9 +119,17 @@ export default function TutorBookingsIndex({ bookings }: Props) {
                                                 {b.status === 'pending' && (
                                                     <button
                                                         onClick={() => handleConfirm(b.id)}
-                                                        className="text-xs font-medium text-green-600 hover:underline dark:text-green-400"
+                                                        disabled={confirmingId === b.id}
+                                                        className="flex items-center gap-1 text-xs font-medium text-green-600 hover:underline dark:text-green-400 disabled:opacity-50"
                                                     >
-                                                        Confirm
+                                                        {confirmingId === b.id ? (
+                                                            <>
+                                                                <Loader2 className="size-3 animate-spin" />
+                                                                Confirming…
+                                                            </>
+                                                        ) : (
+                                                            'Confirm'
+                                                        )}
                                                     </button>
                                                 )}
                                             </div>

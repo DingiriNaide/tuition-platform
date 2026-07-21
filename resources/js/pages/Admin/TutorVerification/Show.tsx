@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface Subject {
     id: number;
@@ -41,13 +42,21 @@ interface Props {
 export default function Show({ tutor }: Props) {
     const [rejecting, setRejecting] = useState(false);
     const [reason, setReason] = useState('');
+    const [isApproving, setIsApproving] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
 
     function approve() {
-        router.post(`/admin/tutors/${tutor.id}/approve`);
+        setIsApproving(true);
+        router.post(`/admin/tutors/${tutor.id}/approve`, {}, {
+            onFinish: () => setIsApproving(false),
+        });
     }
 
     function reject() {
-        router.post(`/admin/tutors/${tutor.id}/reject`, { reason });
+        setIsRejecting(true);
+        router.post(`/admin/tutors/${tutor.id}/reject`, { reason }, {
+            onFinish: () => setIsRejecting(false),
+        });
         setRejecting(false);
     }
 
@@ -65,7 +74,10 @@ export default function Show({ tutor }: Props) {
     return (
         <>
             <Head title={`Review — ${tutor.full_name}`} />
-            <div className="max-w-3xl mx-auto p-6 space-y-6">
+            <div className="max-w-3xl mx-auto p-6 space-y-6 relative">
+
+                <LoadingOverlay show={isApproving} message="Approving tutor…" variant="card" />
+                <LoadingOverlay show={isRejecting} message="Rejecting tutor…" variant="card" />
 
                 <div className="flex items-center gap-4">
                     <Link
@@ -226,7 +238,12 @@ export default function Show({ tutor }: Props) {
                     <div className="bg-white dark:bg-gray-800 rounded-lg border p-6">
                         <h2 className="font-medium mb-3">Actions</h2>
                         <button
-                            onClick={() => router.post(`/admin/tutors/${tutor.id}/reject`)}
+                            onClick={() => {
+                                setIsRejecting(true);
+                                router.post(`/admin/tutors/${tutor.id}/reject`, {}, {
+                                    onFinish: () => setIsRejecting(false),
+                                });
+                            }}
                             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm font-medium"
                         >
                             Revoke Verification
