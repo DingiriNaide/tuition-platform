@@ -1,7 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, Deferred } from '@inertiajs/react';
 import { Users, CalendarDays, CreditCard, BookOpen, BarChart2, UserPlus } from 'lucide-react';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/ParentProfileController';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
+import { motion, AnimatePresence } from 'motion/react';
+import StatsSkeleton from '@/components/skeletons/StatsSkeleton';
 
 interface ParentProfile {
     id: number;
@@ -19,7 +21,7 @@ interface Stats {
 
 interface Props {
     profile: ParentProfile | null;
-    stats: Stats;
+    stats?: Stats; // Made optional for Deferred loading
 }
 
 export default function ParentDashboard({ profile, stats }: Props) {
@@ -28,17 +30,26 @@ export default function ParentDashboard({ profile, stats }: Props) {
             <Head title="Parent Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
-                {!profile && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between">
-                        <p className="text-amber-800 text-sm font-medium">
-                            Complete your parent profile to monitor your children's progress.
-                        </p>
-                        <Link href={create.url()}
-                            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">
-                            Create Profile
-                        </Link>
-                    </div>
-                )}
+                {/* Profile incomplete warning */}
+                <AnimatePresence>
+                    {!profile && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between overflow-hidden"
+                        >
+                            <p className="text-amber-800 text-sm font-medium">
+                                Complete your parent profile to monitor your children's progress.
+                            </p>
+                            <Link href={create.url()}
+                                className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">
+                                Create Profile
+                            </Link>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">
@@ -47,24 +58,26 @@ export default function ParentDashboard({ profile, stats }: Props) {
                     <p className="text-gray-500 text-sm mt-1">Monitor your children's learning progress.</p>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {[
-                        { label: 'Linked Students',  value: stats.linked_students,  icon: Users,       color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                        { label: 'Upcoming Classes', value: stats.upcoming_classes, icon: CalendarDays, color: 'text-blue-600',   bg: 'bg-blue-50'    },
-                        { label: 'Pending Payments', value: stats.pending_payments, icon: CreditCard,  color: 'text-amber-600',  bg: 'bg-amber-50'   },
-                    ].map(({ label, value, icon: Icon, color, bg }) => (
-                        <div key={label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                            <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm text-gray-500">{label}</p>
-                                <div className={`size-8 rounded-lg ${bg} flex items-center justify-center`}>
-                                    <Icon className={`size-4 ${color}`} />
+                {/* Stats — Deferred */}
+                <Deferred data="stats" fallback={<StatsSkeleton count={3} />}>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {[
+                            { label: 'Linked Students',  value: stats?.linked_students,  icon: Users,        color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                            { label: 'Upcoming Classes', value: stats?.upcoming_classes, icon: CalendarDays, color: 'text-blue-600',    bg: 'bg-blue-50'    },
+                            { label: 'Pending Payments', value: stats?.pending_payments, icon: CreditCard,   color: 'text-amber-600',   bg: 'bg-amber-50'   },
+                        ].map(({ label, value, icon: Icon, color, bg }) => (
+                            <div key={label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-sm text-gray-500">{label}</p>
+                                    <div className={`size-8 rounded-lg ${bg} flex items-center justify-center`}>
+                                        <Icon className={`size-4 ${color}`} />
+                                    </div>
                                 </div>
+                                <p className="text-3xl font-bold text-gray-900">{value}</p>
                             </div>
-                            <p className="text-3xl font-bold text-gray-900">{value}</p>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                </Deferred>
 
                 {/* Profile card */}
                 {profile && (
@@ -95,10 +108,10 @@ export default function ParentDashboard({ profile, stats }: Props) {
                     <h2 className="font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3">
                         {[
-                            { title: 'Link a Student',  desc: "Connect your child's account",    href: '#',                icon: UserPlus    },
-                            { title: 'View Progress',   desc: 'Check attendance and grades',     href: '#',                icon: BarChart2   },
-                            { title: 'Browse Courses',  desc: 'Find tutors for your child',      href: coursesIndex.url(), icon: BookOpen    },
-                            { title: 'Payments',        desc: 'Manage fees and invoices',        href: '#',                icon: CreditCard  },
+                            { title: 'Link a Student',  desc: "Connect your child's account",    href: '#',                icon: UserPlus   },
+                            { title: 'View Progress',   desc: 'Check attendance and grades',     href: '#',                icon: BarChart2  },
+                            { title: 'Browse Courses',  desc: 'Find tutors for your child',      href: coursesIndex.url(), icon: BookOpen   },
+                            { title: 'Payments',        desc: 'Manage fees and invoices',        href: '#',                icon: CreditCard },
                         ].map(({ title, desc, href, icon: Icon }) => (
                             <Link key={title} href={href}
                                 className="flex items-start gap-3 border border-gray-100 rounded-xl p-4

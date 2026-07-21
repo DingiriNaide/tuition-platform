@@ -88,8 +88,8 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
                                             slot.is_full
                                                 ? 'cursor-not-allowed border-gray-200 opacity-50 dark:border-gray-700'
                                                 : data.schedule_id === String(slot.id)
-                                                ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-500 dark:bg-indigo-900/20'
-                                                : 'border-gray-200 hover:border-indigo-300 dark:border-gray-700',
+                                                ? 'border-emerald-500 bg-emerald-50 dark:border-emerald-500 dark:bg-emerald-900/20'
+                                                : 'border-gray-200 hover:border-emerald-300 dark:border-gray-700',
                                         ].join(' ')}
                                     >
                                         <input
@@ -99,7 +99,7 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
                                             disabled={slot.is_full}
                                             checked={data.schedule_id === String(slot.id)}
                                             onChange={() => setData('schedule_id', String(slot.id))}
-                                            className="mt-0.5 text-indigo-600"
+                                            className="mt-0.5 text-emerald-600"
                                         />
                                         <div className="flex-1">
                                             <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -149,7 +149,7 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
                                         disabled={disabled}
                                         checked={data.billing_type === value}
                                         onChange={() => setData('billing_type', value)}
-                                        className="text-indigo-600"
+                                        className="text-emerald-600"
                                     />
                                     {label}
                                 </label>
@@ -205,7 +205,7 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
                         <button
                             type="submit"
                             disabled={processing || schedules.length === 0}
-                            className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
                         >
                             {processing ? 'Submitting…' : 'Submit Booking Request'}
                         </button>
@@ -217,5 +217,5 @@ export default function BookingCreate({ course, schedules, dayOptions }: Props) 
 }
 
 function inp(err: boolean) {
-    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
+    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
 }

@@ -27,8 +27,16 @@ class DashboardController extends Controller
     {
         $profile = $user->studentProfile;
 
-        $pendingPaymentsCount  = 0;
-        $pendingPaymentsAmount = 0;
+        return Inertia::render('Dashboard/Student', [
+            'profile' => $profile,
+            'stats'   => Inertia::defer(fn () => $this->studentStats($profile)),
+            'pendingPaymentsCount'  => Inertia::defer(fn () => $this->studentPendingPaymentsCount($profile)),
+            'pendingPaymentsAmount' => Inertia::defer(fn () => $this->studentPendingPaymentsAmount($profile)),
+        ]);
+    }
+
+    private function studentStats($profile): array
+    {
         $now = now()->timezone('Asia/Colombo')->toDateString();
 
         $stats = [
@@ -38,14 +46,6 @@ class DashboardController extends Controller
         ];
 
         if ($profile) {
-            $pendingPaymentsCount  = \App\Models\Payment::where('student_profile_id', $profile->id)
-                ->where('status', 'pending')
-                ->count();
-
-            $pendingPaymentsAmount = \App\Models\Payment::where('student_profile_id', $profile->id)
-                ->where('status', 'pending')
-                ->sum('amount');
-
             $stats['upcoming_classes'] = \App\Models\BookingSession::whereHas('booking', fn($q) =>
                     $q->where('student_profile_id', $profile->id)
                     ->whereIn('status', ['pending', 'confirmed'])
@@ -67,20 +67,41 @@ class DashboardController extends Controller
                 ->count();
         }
 
-        return Inertia::render('Dashboard/Student', [
-            'profile'               => $profile,
-            'stats'                 => $stats,
-            'pendingPaymentsCount'  => $pendingPaymentsCount,
-            'pendingPaymentsAmount' => $pendingPaymentsAmount,
-        ]);
+        return $stats;
+    }
+
+    private function studentPendingPaymentsCount($profile): int
+    {
+        if (!$profile) return 0;
+
+        return \App\Models\Payment::where('student_profile_id', $profile->id)
+            ->where('status', 'pending')
+            ->count();
+    }
+
+    private function studentPendingPaymentsAmount($profile): float
+    {
+        if (!$profile) return 0;
+
+        return \App\Models\Payment::where('student_profile_id', $profile->id)
+            ->where('status', 'pending')
+            ->sum('amount');
     }
 
     private function tutorDashboard($user): Response
     {
         $profile = $user->tutorProfile?->load('subjects');
 
-        $pendingPayouts = 0;
-        $totalEarnings  = 0;
+        return Inertia::render('Dashboard/Tutor', [
+            'profile'        => $profile,
+            'stats'          => Inertia::defer(fn () => $this->tutorStats($profile)),
+            'pendingPayouts' => Inertia::defer(fn () => $this->tutorPendingPayouts($profile)),
+            'totalEarnings'  => Inertia::defer(fn () => $this->tutorTotalEarnings($profile)),
+        ]);
+    }
+
+    private function tutorStats($profile): array
+    {
         $now = now()->timezone('Asia/Colombo')->toDateString();
 
         $stats = [
@@ -91,14 +112,6 @@ class DashboardController extends Controller
         ];
 
         if ($profile) {
-            $pendingPayouts = \App\Models\TutorPayout::where('tutor_profile_id', $profile->id)
-                ->where('status', 'pending')
-                ->sum('net_amount');
-
-            $totalEarnings = \App\Models\TutorPayout::where('tutor_profile_id', $profile->id)
-                ->where('status', 'paid')
-                ->sum('net_amount');
-
             $stats['total_students'] = \App\Models\Booking::whereHas('course', fn($q) =>
                     $q->where('tutor_profile_id', $profile->id)
                 )
@@ -125,12 +138,25 @@ class DashboardController extends Controller
                 ->count();
         }
 
-        return Inertia::render('Dashboard/Tutor', [
-            'profile'        => $profile,
-            'stats'          => $stats,
-            'pendingPayouts' => $pendingPayouts,
-            'totalEarnings'  => $totalEarnings,
-        ]);
+        return $stats;
+    }
+
+    private function tutorPendingPayouts($profile): float
+    {
+        if (!$profile) return 0;
+
+        return (float) \App\Models\TutorPayout::where('tutor_profile_id', $profile->id)
+            ->where('status', 'pending')
+            ->sum('net_amount');
+    }
+
+    private function tutorTotalEarnings($profile): float
+    {
+        if (!$profile) return 0;
+
+        return (float) \App\Models\TutorPayout::where('tutor_profile_id', $profile->id)
+            ->where('status', 'paid')
+            ->sum('net_amount');
     }
 
     private function parentDashboard($user): Response
@@ -139,29 +165,56 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard/Parent', [
             'profile' => $profile,
-            'stats'   => [
-                'linked_students'  => 0,
-                'upcoming_classes' => 0,
-                'pending_payments' => 0,
-            ],
+            'stats'   => Inertia::defer(fn () => $this->parentStats($profile)),
         ]);
     }
 
+    private function parentStats($profile): array
+{
+    $stats = [
+        'linked_students'  => 0,
+        'upcoming_classes' => 0,
+        'pending_payments' => 0,
+    ];
+
+    if ($profile) {
+        $stats['linked_students']  = $profile->students()->count();
+        
+        $stats['upcoming_classes'] = \App\Models\BookingSession::whereHas('booking.studentProfile', fn($q) => 
+                $q->where('parent_id', $profile->id)
+            )
+            ->where('status', 'scheduled')
+            ->where('session_date', '>=', now()->timezone('Asia/Colombo')->toDateString())
+            ->count();
+            
+        $stats['pending_payments'] = \App\Models\Payment::whereHas('studentProfile', fn($q) => 
+                $q->where('parent_id', $profile->id)
+            )
+            ->where('status', 'pending')
+            ->count();
+    }
+
+    return $stats;
+}
+
     private function adminDashboard(): Response
     {
-        $now = now()->timezone('Asia/Colombo')->toDateString();
-
         return Inertia::render('Dashboard/Admin', [
-            'stats' => [
-                'total_students'        => \App\Models\StudentProfile::count(),
-                'total_tutors'          => \App\Models\TutorProfile::count(),
-                'pending_verifications' => \App\Models\TutorProfile::where('is_verified', false)->count(),
-                'total_subjects'        => \App\Models\Subject::count(),
-                'active_courses'        => \App\Models\Course::where('is_active', true)->count(),
-                'total_bookings'        => \App\Models\Booking::whereIn('status', ['pending', 'confirmed'])->count(),
-                'todays_sessions'       => \App\Models\BookingSession::where('session_date', $now)->count(),
-                'total_revenue'         => \App\Models\Payment::where('status', 'completed')->sum('amount'),
-            ],
+            'stats' => Inertia::defer(fn () => $this->adminStats()),
         ]);
+    }
+
+    private function adminStats(): array
+    {
+        return [
+            'total_students'        => \App\Models\StudentProfile::count(),
+            'total_tutors'          => \App\Models\TutorProfile::count(),
+            'pending_verifications' => \App\Models\TutorProfile::where('is_verified', false)->count(),
+            'total_subjects'        => \App\Models\Subject::count(),
+            'active_courses'        => \App\Models\Course::where('is_active', true)->count(),
+            'total_bookings'        => \App\Models\Booking::whereIn('status', ['pending', 'confirmed'])->count(),
+            'todays_sessions'       => \App\Models\BookingSession::whereDate('session_date', today())->count(),
+            'total_revenue'         => (float) \App\Models\Payment::where('status', 'completed')->sum('amount'),
+        ];
     }
 }

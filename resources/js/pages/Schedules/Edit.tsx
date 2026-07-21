@@ -68,7 +68,7 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Schedule</h1>
                     <Link
                         href={index.url()}
-                        className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                        className="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
                     >
                         ← Back to schedules
                     </Link>
@@ -109,7 +109,7 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
                                                 type="radio"
                                                 checked={data.is_recurring === value}
                                                 onChange={() => setData('is_recurring', value)}
-                                                className="text-indigo-600"
+                                                className="text-emerald-600"
                                             />
                                             {label}
                                         </label>
@@ -211,7 +211,7 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
                                         onChange={(e) => setData('is_active', e.target.checked)}
                                         className="peer sr-only"
                                     />
-                                    <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-indigo-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
+                                    <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
                                 </label>
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {data.is_active ? 'Active' : 'Inactive'}
@@ -224,7 +224,7 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
                         >
                             {processing ? 'Saving…' : 'Save Changes'}
                         </button>
@@ -236,5 +236,5 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
 }
 
 function inp(err: boolean) {
-    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
+    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
 }

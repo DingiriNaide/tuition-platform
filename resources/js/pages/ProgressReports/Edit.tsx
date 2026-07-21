@@ -80,7 +80,7 @@ export default function ProgressReportEdit({ report, gradeOptions }: Props) {
                 <nav className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     <Link
                         href={showReport.url(report.id)}
-                        className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                        className="hover:text-emerald-600 dark:hover:text-emerald-400"
                     >
                         Progress Report #{report.id}
                     </Link>
@@ -258,7 +258,7 @@ export default function ProgressReportEdit({ report, gradeOptions }: Props) {
                             type="button"
                             disabled={processing}
                             onClick={(e) => submit(e, true)}
-                            className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                            className="rounded-md bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
                         >
                             {processing
                                 ? 'Saving…'
@@ -315,6 +315,6 @@ function inp(hasError: boolean): string {
         'focus:outline-none focus:ring-2',
         hasError
             ? 'border-red-400 focus:ring-red-400'
-            : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
+            : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
     ].join(' ');
 }

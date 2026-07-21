@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     LayoutGrid, BookOpen, CalendarDays, CheckSquare,
     BarChart2, CreditCard, GraduationCap, Users,
@@ -10,6 +10,7 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface Props {
     children: React.ReactNode;
@@ -73,18 +74,48 @@ export default function AppLayout({ children, breadcrumbs = [] }: Props) {
         ? user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
         : 'U';
 
+    const userMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setUserMenuOpen(false);
+            }
+        }
+
+        function handleEscape(event: KeyboardEvent) {
+            if (event.key === 'Escape') setUserMenuOpen(false);
+        }
+
+        if (userMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [userMenuOpen]);
+
     return (
         <div className="flex h-screen bg-background overflow-hidden">
 
             {/* ── Sidebar ─────────────────────────────────────────── */}
             <>
                 {/* Mobile overlay */}
-                {mobileOpen && (
-                    <div
-                        className="fixed inset-0 z-20 bg-black/50 lg:hidden"
-                        onClick={() => setMobileOpen(false)}
-                    />
-                )}
+                <AnimatePresence>
+                    {mobileOpen && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="fixed inset-0 z-20 bg-black/50 lg:hidden"
+                            onClick={() => setMobileOpen(false)}
+                        />
+                    )}
+                </AnimatePresence>
 
                 <aside className={`
                     fixed inset-y-0 left-0 z-30 w-56 bg-sidebar flex flex-col
@@ -129,11 +160,11 @@ export default function AppLayout({ children, breadcrumbs = [] }: Props) {
 
                     {/* User section */}
                     <div className="border-t border-emerald-800 px-3 py-3">
-                        <div className="relative">
+                        <div className="relative" ref={userMenuRef}>
                             <button
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                                           text-emerald-100 hover:bg-emerald-800 transition-colors"
+                                        text-emerald-100 hover:bg-emerald-800 transition-colors"
                             >
                                 {user?.avatar_url ? (
                                     <img
@@ -153,24 +184,32 @@ export default function AppLayout({ children, breadcrumbs = [] }: Props) {
                                 <ChevronDown className="size-3.5 text-emerald-400 shrink-0" />
                             </button>
 
-                            {userMenuOpen && (
-                                <div className="absolute bottom-full left-0 right-0 mb-1 bg-white rounded-xl
-                                                shadow-lg border border-gray-100 overflow-hidden z-50">
-                                    <Link href="/settings/profile"
-                                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700
-                                                   hover:bg-gray-50 transition-colors">
-                                        <User className="size-4 text-gray-400" />
-                                        Profile Settings
-                                    </Link>
-                                    <div className="border-t border-gray-100" />
-                                    <Link href="/logout" method="post" as="button"
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm
-                                                   text-red-600 hover:bg-red-50 transition-colors">
-                                        <LogOut className="size-4" />
-                                        Log out
-                                    </Link>
-                                </div>
-                            )}
+                            <AnimatePresence>
+                                {userMenuOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                                        className="absolute bottom-full left-0 right-0 mb-1 bg-white rounded-xl
+                                                shadow-lg border border-gray-100 overflow-hidden z-50"
+                                    >
+                                        <Link href="/settings/profile"
+                                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700
+                                                    hover:bg-gray-50 transition-colors">
+                                            <User className="size-4 text-gray-400" />
+                                            Profile Settings
+                                        </Link>
+                                        <div className="border-t border-gray-100" />
+                                        <Link href="/logout" method="post" as="button"
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm
+                                                    text-red-600 hover:bg-red-50 transition-colors">
+                                            <LogOut className="size-4" />
+                                            Log out
+                                        </Link>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </aside>

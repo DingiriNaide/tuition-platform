@@ -75,7 +75,7 @@ export default function ProgressReportCreate({
                 <nav className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     <Link
                         href={showBooking.url(booking.id)}
-                        className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                        className="hover:text-emerald-600 dark:hover:text-emerald-400"
                     >
                         Booking #{booking.id}
                     </Link>
@@ -221,7 +221,7 @@ export default function ProgressReportCreate({
                             type="button"
                             disabled={processing}
                             onClick={(e) => submit(e, true)}
-                            className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                            className="rounded-md bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
                         >
                             {processing ? 'Publishing…' : 'Publish to Student'}
                         </button>
@@ -258,5 +258,5 @@ function Field({
 }
 
 function inp(err: boolean): string {
-    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
+    return `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${err ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'}`;
 }

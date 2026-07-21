@@ -120,7 +120,7 @@ export default function ProgressReportsIndex({
                                         </Link>
                                         <Link
                                             href={show.url(report.id)}
-                                            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
+                                            className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500"
                                         >
                                             View
                                         </Link>
@@ -138,7 +138,7 @@ export default function ProgressReportsIndex({
                                 key={i}
                                 disabled={!link.url}
                                 onClick={() => link.url && router.get(link.url)}
-                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-400'}`}
+                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-400'}`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}

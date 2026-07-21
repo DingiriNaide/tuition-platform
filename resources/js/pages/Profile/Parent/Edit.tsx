@@ -1,5 +1,6 @@
 import { useForm, Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Camera } from 'lucide-react';
 import { update, show } from '@/actions/App/Http/Controllers/ProfileController/ParentProfileController';
 
 interface ParentProfile {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function Edit({ profile }: Props) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url ?? null);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -46,29 +48,56 @@ export default function Edit({ profile }: Props) {
             <Head title="Edit Parent Profile" />
             <div className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-semibold mb-6">Edit Parent Profile</h1>
-                <form onSubmit={submit} className="space-y-4">
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Avatar</label>
-                        <div className="flex items-center gap-4">
-                            <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center shrink-0">
-                                {avatarPreview ? (
-                                    <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
-                                ) : (
-                                    <span className="text-lg font-semibold text-gray-500">
-                                        {profile.full_name?.charAt(0).toUpperCase() ?? '?'}
-                                    </span>
-                                )}
-                            </div>
-                            <input
-                                type="file"
-                                accept="image/png,image/jpeg"
-                                onChange={handleAvatarChange}
-                                className="text-sm"
-                            />
+                {/* Profile card */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 mb-6 flex items-center gap-5">
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="relative group shrink-0"
+                    >
+                        <div className="h-20 w-20 rounded-full overflow-hidden bg-emerald-600 flex items-center justify-center">
+                            {avatarPreview ? (
+                                <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
+                            ) : (
+                                <span className="text-2xl font-semibold text-white">
+                                    {data.full_name?.charAt(0).toUpperCase() ?? '?'}
+                                </span>
+                            )}
                         </div>
-                        {errors.avatar && <p className="text-red-500 text-sm mt-1">{errors.avatar}</p>}
+                        <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100
+                                        flex items-center justify-center transition-opacity">
+                            <Camera className="size-6 text-white" />
+                        </div>
+                    </button>
+
+                    <div className="min-w-0">
+                        <p className="font-semibold text-lg text-gray-900 dark:text-white truncate">
+                            {data.full_name || 'Your Name'}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {data.phone || data.city || 'Parent'}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="mt-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                        >
+                            Change photo
+                        </button>
                     </div>
+
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                    />
+                </div>
+                {errors.avatar && <p className="text-red-500 text-sm mb-4 -mt-4">{errors.avatar}</p>}
+
+                <form onSubmit={submit} className="space-y-4">
 
                     <div>
                         <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -119,7 +148,6 @@ export default function Edit({ profile }: Props) {
                         >
                             {processing ? 'Saving...' : 'Update Profile'}
                         </button>
-
                         <Link
                             href={show.url()}
                             className="flex-1 text-center border py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800"

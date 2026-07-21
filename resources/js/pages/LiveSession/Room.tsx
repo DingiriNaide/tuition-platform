@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import axios from 'axios';
 import { start, end, chat, hand, } from '@/actions/App/Http/Controllers/LiveSessionController';
+import { motion, AnimatePresence } from 'motion/react';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -246,20 +247,36 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
                     </div>
 
                     {/* Error banner */}
-                    {error && (
-                        <div className="border-b border-red-800 bg-red-900/50 px-4 py-2 text-sm text-red-300">
-                            {error}
-                        </div>
-                    )}
+                    <AnimatePresence>
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="border-b border-red-800 bg-red-900/50 px-4 py-2 text-sm text-red-300 overflow-hidden"
+                            >
+                                {error}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Hand raises notification */}
-                    {handRaises.size > 0 && (
-                        <div className="border-b border-yellow-800 bg-yellow-900/40 px-4 py-2">
-                            <p className="text-xs text-yellow-300">
-                                ✋ {Array.from(handRaises.values()).map((h) => h.name).join(', ')} raised hand
-                            </p>
-                        </div>
-                    )}
+                    <AnimatePresence>
+                        {handRaises.size > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="border-b border-yellow-800 bg-yellow-900/40 px-4 py-2 overflow-hidden"
+                            >
+                                <p className="text-xs text-yellow-300">
+                                    ✋ {Array.from(handRaises.values()).map((h) => h.name).join(', ')} raised hand
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Videos */}
                     <div className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto p-3">

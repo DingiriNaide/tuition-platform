@@ -52,7 +52,7 @@ const statusBadge: Record<string, string> = {
     late:      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
     excused:   'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     scheduled: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-    completed: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+    completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
     cancelled: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
 };
 
@@ -86,7 +86,7 @@ export default function BookingRoster({
                 <nav className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     <Link
                         href={showBooking.url(booking.id)}
-                        className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                        className="hover:text-emerald-600 dark:hover:text-emerald-400"
                     >
                         Booking #{booking.id}
                     </Link>
@@ -105,7 +105,7 @@ export default function BookingRoster({
                 <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
                     {[
                         { label: 'Total Sessions', value: stats.total_sessions, color: 'text-gray-900 dark:text-white' },
-                        { label: 'Completed', value: stats.completed, color: 'text-indigo-600 dark:text-indigo-400' },
+                        { label: 'Completed', value: stats.completed, color: 'text-emerald-600 dark:text-emerald-400' },
                         { label: 'Attended', value: stats.attended, color: 'text-green-600 dark:text-green-400' },
                         { label: 'Absent', value: stats.absent, color: 'text-red-600 dark:text-red-400' },
                         { label: 'Late', value: stats.late, color: 'text-yellow-600 dark:text-yellow-400' },
@@ -199,7 +199,7 @@ export default function BookingRoster({
                                             {['scheduled', 'ongoing', 'completed'].includes(session.status) && (
                                                 <Link
                                                     href={mark.url(session.id)}
-                                                    className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                                                    className="text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-400"
                                                 >
                                                     {session.attendance_record ? 'Edit' : 'Mark'}
                                                 </Link>

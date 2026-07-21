@@ -1,6 +1,6 @@
-// show.tsx
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface Subject {
     id: number;
@@ -163,46 +163,62 @@ export default function Show({ tutor }: Props) {
                     <div className="bg-white dark:bg-gray-800 rounded-lg border p-6 space-y-4">
                         <h2 className="font-medium">Verification Decision</h2>
 
-                        {!rejecting ? (
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={approve}
-                                    className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 font-medium"
+                        <AnimatePresence mode="wait">
+                            {!rejecting ? (
+                                <motion.div
+                                    key="approve-reject"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="flex gap-3"
                                 >
-                                    Approve & Verify
-                                </button>
-                                <button
-                                    onClick={() => setRejecting(true)}
-                                    className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 font-medium"
-                                >
-                                    Reject
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                <textarea
-                                    value={reason}
-                                    onChange={e => setReason(e.target.value)}
-                                    rows={3}
-                                    placeholder="Reason for rejection (optional)..."
-                                    className="w-full border rounded px-3 py-2 text-sm"
-                                />
-                                <div className="flex gap-3">
                                     <button
-                                        onClick={reject}
+                                        onClick={approve}
+                                        className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 font-medium"
+                                    >
+                                        Approve & Verify
+                                    </button>
+                                    <button
+                                        onClick={() => setRejecting(true)}
                                         className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 font-medium"
                                     >
-                                        Confirm Rejection
+                                        Reject
                                     </button>
-                                    <button
-                                        onClick={() => setRejecting(false)}
-                                        className="flex-1 border py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="reject-form"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="space-y-3 overflow-hidden"
+                                >
+                                    <textarea
+                                        value={reason}
+                                        onChange={e => setReason(e.target.value)}
+                                        rows={3}
+                                        placeholder="Reason for rejection (optional)..."
+                                        className="w-full border rounded px-3 py-2 text-sm"
+                                    />
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={reject}
+                                            className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 font-medium"
+                                        >
+                                            Confirm Rejection
+                                        </button>
+                                        <button
+                                            onClick={() => setRejecting(false)}
+                                            className="flex-1 border py-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 )}
 

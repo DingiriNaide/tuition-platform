@@ -108,7 +108,7 @@ export default function CourseCreate({
 
                         {/* Thumbnail */}
                         <Field label="Thumbnail" error={errors.thumbnail}>
-                            <label className="flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-indigo-400 dark:border-gray-600">
+                            <label className="flex cursor-pointer items-center gap-3 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-emerald-400 dark:border-gray-600">
                                 {data.thumbnail ? (
                                     <img
                                         src={URL.createObjectURL(data.thumbnail)}
@@ -297,7 +297,7 @@ export default function CourseCreate({
                                     onChange={(e) => setData('is_group', e.target.checked)}
                                     className="peer sr-only"
                                 />
-                                <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-indigo-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
+                                <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
                             </label>
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                                 {data.is_group ? 'Group class' : 'Private / 1-on-1 class'}
@@ -313,7 +313,7 @@ export default function CourseCreate({
                                     onChange={(e) => setData('is_active', e.target.checked)}
                                     className="peer sr-only"
                                 />
-                                <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-indigo-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
+                                <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
                             </label>
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                                 {data.is_active ? 'Course is active (visible to students)' : 'Course is inactive (hidden)'}
@@ -326,7 +326,7 @@ export default function CourseCreate({
                         <button
                             type="submit"
                             disabled={processing}
-                            className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+                            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 disabled:opacity-50"
                         >
                             {processing ? 'Creating…' : 'Create Course'}
                         </button>
@@ -375,7 +375,7 @@ function inputClass(hasError: boolean): string {
         'block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2',
         hasError
             ? 'border-red-400 focus:ring-red-400'
-            : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
+            : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
     ].join(' ');
 }
 

@@ -1,8 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, Deferred } from '@inertiajs/react';
 import { Users, CalendarDays, FileText, BookOpen, DollarSign, Clock, PlusCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { create, edit } from '@/actions/App/Http/Controllers/ProfileController/TutorProfileController';
 import { index, create as createCourse } from '@/actions/App/Http/Controllers/CourseController';
 import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
+import StatsSkeleton from '@/components/skeletons/StatsSkeleton';
+import EarningsSkeleton from '@/components/skeletons/EarningsSkeleton';
 
 interface Subject {
     id: number;
@@ -30,9 +33,9 @@ interface Stats {
 
 interface Props {
     profile: TutorProfile | null;
-    stats: Stats;
-    pendingPayouts: number;
-    totalEarnings: number;
+    stats?: Stats;
+    pendingPayouts?: number;
+    totalEarnings?: number;
 }
 
 export default function TutorDashboard({ profile, stats, pendingPayouts, totalEarnings }: Props) {
@@ -41,16 +44,24 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
             <Head title="Dashboard" />
             <div className="max-w-5xl mx-auto p-6 space-y-6">
 
-                {/* Profile incomplete */}
-                {!profile && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between">
-                        <p className="text-amber-800 text-sm font-medium">Complete your tutor profile to start teaching.</p>
-                        <Link href={create.url()}
-                            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">
-                            Create Profile
-                        </Link>
-                    </div>
-                )}
+                {/* Profile incomplete warning */}
+                <AnimatePresence>
+                    {!profile && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between overflow-hidden"
+                        >
+                            <p className="text-amber-800 text-sm font-medium">Complete your tutor profile to start teaching.</p>
+                            <Link href={create.url()}
+                                className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">
+                                Create Profile
+                            </Link>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Pending verification */}
                 {profile && !profile.is_verified && (
@@ -76,47 +87,51 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                     )}
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {[
-                        { label: 'Total Students',   value: stats.total_students,   icon: Users,       color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                        { label: 'Upcoming Classes', value: stats.upcoming_classes, icon: CalendarDays, color: 'text-blue-600',   bg: 'bg-blue-50'    },
-                        { label: 'Pending Reviews',  value: stats.pending_reviews,  icon: FileText,    color: 'text-amber-600',  bg: 'bg-amber-50'   },
-                        { label: 'Active Courses',   value: stats.active_courses,   icon: BookOpen,    color: 'text-purple-600', bg: 'bg-purple-50'  },
-                    ].map(({ label, value, icon: Icon, color, bg }) => (
-                        <div key={label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                            <div className="flex items-center justify-between mb-3">
-                                <p className="text-xs text-gray-500">{label}</p>
-                                <div className={`size-7 rounded-lg ${bg} flex items-center justify-center`}>
-                                    <Icon className={`size-3.5 ${color}`} />
+                {/* Stats — deferred */}
+                <Deferred data="stats" fallback={<StatsSkeleton count={4} />}>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {[
+                            { label: 'Total Students',   value: stats?.total_students,   icon: Users,        color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                            { label: 'Upcoming Classes', value: stats?.upcoming_classes, icon: CalendarDays, color: 'text-blue-600',    bg: 'bg-blue-50'    },
+                            { label: 'Pending Reviews',  value: stats?.pending_reviews,  icon: FileText,     color: 'text-amber-600',   bg: 'bg-amber-50'   },
+                            { label: 'Active Courses',   value: stats?.active_courses,   icon: BookOpen,     color: 'text-purple-600',  bg: 'bg-purple-50'  },
+                        ].map(({ label, value, icon: Icon, color, bg }) => (
+                            <div key={label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-xs text-gray-500">{label}</p>
+                                    <div className={`size-7 rounded-lg ${bg} flex items-center justify-center`}>
+                                        <Icon className={`size-3.5 ${color}`} />
+                                    </div>
                                 </div>
+                                <p className="text-3xl font-bold text-gray-900">{value}</p>
                             </div>
-                            <p className="text-3xl font-bold text-gray-900">{value}</p>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                </Deferred>
 
-                {/* Earnings */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Clock className="size-4 text-amber-600" />
-                            <p className="text-sm text-amber-700 font-medium">Pending Payouts</p>
+                {/* Earnings — deferred */}
+                <Deferred data={['pendingPayouts', 'totalEarnings']} fallback={<EarningsSkeleton />}>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Clock className="size-4 text-amber-600" />
+                                <p className="text-sm text-amber-700 font-medium">Pending Payouts</p>
+                            </div>
+                            <p className="text-2xl font-bold text-amber-900">
+                                LKR {Number(pendingPayouts ?? 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                            </p>
                         </div>
-                        <p className="text-2xl font-bold text-amber-900">
-                            LKR {Number(pendingPayouts).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                        </p>
-                    </div>
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <DollarSign className="size-4 text-emerald-600" />
-                            <p className="text-sm text-emerald-700 font-medium">Total Earnings</p>
+                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="size-4 text-emerald-600" />
+                                <p className="text-sm text-emerald-700 font-medium">Total Earnings</p>
+                            </div>
+                            <p className="text-2xl font-bold text-emerald-900">
+                                LKR {Number(totalEarnings ?? 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                            </p>
                         </div>
-                        <p className="text-2xl font-bold text-emerald-900">
-                            LKR {Number(totalEarnings).toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-                        </p>
                     </div>
-                </div>
+                </Deferred>
 
                 {/* Profile card */}
                 {profile && (
@@ -129,10 +144,10 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                             {[
-                                { label: 'Rating',     value: `${Number(profile.rating).toFixed(1)} ★ (${profile.total_reviews} reviews)` },
-                                { label: 'Hourly Rate', value: `LKR ${profile.hourly_rate ?? '—'}` },
-                                { label: 'Medium',     value: profile.medium },
-                                { label: 'Status',     value: profile.is_active ? 'Active' : 'Inactive' },
+                                { label: 'Rating',      value: `${Number(profile.rating ?? 0).toFixed(1)} ★ (${profile.total_reviews ?? 0} reviews)` },
+                                { label: 'Hourly Rate', value: profile.hourly_rate ? `LKR ${profile.hourly_rate}` : '—' },
+                                { label: 'Medium',      value: profile.medium },
+                                { label: 'Status',      value: profile.is_active ? 'Active' : 'Inactive' },
                             ].map(({ label, value }) => (
                                 <div key={label}>
                                     <p className="text-gray-400 text-xs mb-0.5">{label}</p>
@@ -161,7 +176,7 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                     <h2 className="font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-2 gap-3">
                         {[
-                            { title: 'Create Course',    desc: 'List a new course for students',    href: createCourse.url(),  icon: PlusCircle  },
+                            { title: 'Create Course',    desc: 'List a new course for students',    href: createCourse.url(),   icon: PlusCircle  },
                             { title: 'My Courses',       desc: 'View and manage your courses',      href: `${index.url()}?mine=1`,         icon: BookOpen    },
                             { title: 'View Earnings',    desc: 'Check your payment history',        href: paymentsIndex.url(), icon: DollarSign  },
                             { title: 'Schedule Class',   desc: 'Set up an upcoming session',        href: '/schedules/create', icon: CalendarDays},
