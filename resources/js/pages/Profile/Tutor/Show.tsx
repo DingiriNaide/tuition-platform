@@ -66,7 +66,7 @@ export default function Show({ profile }: Props) {
                     <h1 className="text-2xl font-semibold">Tutor Profile</h1>
                     <Link
                         href={edit.url()}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700"
                     >
                         Edit Profile
                     </Link>

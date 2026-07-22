@@ -249,7 +249,7 @@ export default function Edit({ profile }: Props) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                    className="flex-1 bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 disabled:opacity-50"
                                 >
                                     {processing ? 'Saving...' : 'Update Profile'}
                                 </button>

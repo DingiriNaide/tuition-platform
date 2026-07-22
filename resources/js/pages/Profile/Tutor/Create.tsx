@@ -199,7 +199,7 @@ export default function Create({ subjects }: Props) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 disabled:opacity-50"
                             >
                                 {processing ? 'Saving...' : 'Create Profile'}
                             </button>
