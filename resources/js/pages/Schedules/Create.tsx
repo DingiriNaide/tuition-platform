@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/ScheduleController';
 import { FormEvent } from 'react';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface Course {
     id: number;
@@ -46,152 +47,155 @@ export default function ScheduleCreate({ courses, dayOptions }: Props) {
 
     return (
         <>
-            <Head title="Add Schedule" />
+            <div className="max-w-2xl mx-auto p-6 relative">
+                <LoadingOverlay show={processing} message="Creating Schedule…" variant="card" />
+                    <Head title="Add Schedule" />
 
-            <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-                <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-                    Add Availability Schedule
-                </h1>
+                    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+                        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+                            Add Availability Schedule
+                        </h1>
 
-                <form onSubmit={submit} className="space-y-6">
-                    <Card title="Schedule Details">
+                        <form onSubmit={submit} className="space-y-6">
+                            <Card title="Schedule Details">
 
-                        {/* Course */}
-                        <Field label="Course" error={errors.course_id} required>
-                            <select
-                                value={data.course_id}
-                                onChange={(e) => setData('course_id', e.target.value)}
-                                className={sel(!!errors.course_id)}
-                            >
-                                <option value="">Select a course</option>
-                                {courses.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.title} — {c.subject.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </Field>
-
-                        {/* Recurring toggle */}
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Schedule Type
-                            </label>
-                            <div className="flex gap-4">
-                                {[
-                                    { value: true, label: 'Weekly recurring' },
-                                    { value: false, label: 'One-off date' },
-                                ].map(({ value, label }) => (
-                                    <label
-                                        key={String(value)}
-                                        className="flex cursor-pointer items-center gap-2 text-sm"
-                                    >
-                                        <input
-                                            type="radio"
-                                            checked={data.is_recurring === value}
-                                            onChange={() => setData('is_recurring', value)}
-                                            className="text-emerald-600"
-                                        />
-                                        {label}
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Conditional: Day of week or specific date */}
-                        {data.is_recurring ? (
-                            <>
-                                <Field label="Day of Week" error={errors.day_of_week} required>
+                                {/* Course */}
+                                <Field label="Course" error={errors.course_id} required>
                                     <select
-                                        value={data.day_of_week}
-                                        onChange={(e) => setData('day_of_week', e.target.value)}
-                                        className={sel(!!errors.day_of_week)}
+                                        value={data.course_id}
+                                        onChange={(e) => setData('course_id', e.target.value)}
+                                        className={sel(!!errors.course_id)}
                                     >
-                                        <option value="">Select day</option>
-                                        {Object.entries(dayOptions).map(([val, label]) => (
-                                            <option key={val} value={val}>{label}</option>
+                                        <option value="">Select a course</option>
+                                        {courses.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.title} — {c.subject.name}
+                                            </option>
                                         ))}
                                     </select>
                                 </Field>
-                                <Field label="Repeat Until (optional)" error={errors.recur_until}>
+
+                                {/* Recurring toggle */}
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Schedule Type
+                                    </label>
+                                    <div className="flex gap-4">
+                                        {[
+                                            { value: true, label: 'Weekly recurring' },
+                                            { value: false, label: 'One-off date' },
+                                        ].map(({ value, label }) => (
+                                            <label
+                                                key={String(value)}
+                                                className="flex cursor-pointer items-center gap-2 text-sm"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    checked={data.is_recurring === value}
+                                                    onChange={() => setData('is_recurring', value)}
+                                                    className="text-emerald-600"
+                                                />
+                                                {label}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Conditional: Day of week or specific date */}
+                                {data.is_recurring ? (
+                                    <>
+                                        <Field label="Day of Week" error={errors.day_of_week} required>
+                                            <select
+                                                value={data.day_of_week}
+                                                onChange={(e) => setData('day_of_week', e.target.value)}
+                                                className={sel(!!errors.day_of_week)}
+                                            >
+                                                <option value="">Select day</option>
+                                                {Object.entries(dayOptions).map(([val, label]) => (
+                                                    <option key={val} value={val}>{label}</option>
+                                                ))}
+                                            </select>
+                                        </Field>
+                                        <Field label="Repeat Until (optional)" error={errors.recur_until}>
+                                            <input
+                                                type="date"
+                                                value={data.recur_until}
+                                                onChange={(e) => setData('recur_until', e.target.value)}
+                                                className={inp(!!errors.recur_until)}
+                                            />
+                                        </Field>
+                                    </>
+                                ) : (
+                                    <Field label="Date" error={errors.specific_date} required>
+                                        <input
+                                            type="date"
+                                            value={data.specific_date}
+                                            onChange={(e) => setData('specific_date', e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            className={inp(!!errors.specific_date)}
+                                        />
+                                    </Field>
+                                )}
+
+                                {/* Times */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Start Time" error={errors.start_time} required>
+                                        <input
+                                            type="time"
+                                            value={data.start_time}
+                                            onChange={(e) => setData('start_time', e.target.value)}
+                                            className={inp(!!errors.start_time)}
+                                        />
+                                    </Field>
+                                    <Field label="End Time" error={errors.end_time} required>
+                                        <input
+                                            type="time"
+                                            value={data.end_time}
+                                            onChange={(e) => setData('end_time', e.target.value)}
+                                            className={inp(!!errors.end_time)}
+                                        />
+                                    </Field>
+                                </div>
+
+                                {/* Max students override */}
+                                <Field
+                                    label="Max Students (leave blank to use course default)"
+                                    error={errors.max_students}
+                                >
                                     <input
-                                        type="date"
-                                        value={data.recur_until}
-                                        onChange={(e) => setData('recur_until', e.target.value)}
-                                        className={inp(!!errors.recur_until)}
+                                        type="number"
+                                        min="1"
+                                        max="500"
+                                        value={data.max_students}
+                                        onChange={(e) => setData('max_students', e.target.value)}
+                                        className={inp(!!errors.max_students)}
+                                        placeholder="Course default"
                                     />
                                 </Field>
-                            </>
-                        ) : (
-                            <Field label="Date" error={errors.specific_date} required>
-                                <input
-                                    type="date"
-                                    value={data.specific_date}
-                                    onChange={(e) => setData('specific_date', e.target.value)}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    className={inp(!!errors.specific_date)}
-                                />
-                            </Field>
-                        )}
 
-                        {/* Times */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <Field label="Start Time" error={errors.start_time} required>
-                                <input
-                                    type="time"
-                                    value={data.start_time}
-                                    onChange={(e) => setData('start_time', e.target.value)}
-                                    className={inp(!!errors.start_time)}
-                                />
-                            </Field>
-                            <Field label="End Time" error={errors.end_time} required>
-                                <input
-                                    type="time"
-                                    value={data.end_time}
-                                    onChange={(e) => setData('end_time', e.target.value)}
-                                    className={inp(!!errors.end_time)}
-                                />
-                            </Field>
-                        </div>
+                                {/* Active */}
+                                <div className="flex items-center gap-3">
+                                    <Toggle
+                                        checked={data.is_active}
+                                        onChange={(v) => setData('is_active', v)}
+                                    />
+                                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                                        {data.is_active ? 'Active (students can book)' : 'Inactive (hidden from booking)'}
+                                    </span>
+                                </div>
+                            </Card>
 
-                        {/* Max students override */}
-                        <Field
-                            label="Max Students (leave blank to use course default)"
-                            error={errors.max_students}
-                        >
-                            <input
-                                type="number"
-                                min="1"
-                                max="500"
-                                value={data.max_students}
-                                onChange={(e) => setData('max_students', e.target.value)}
-                                className={inp(!!errors.max_students)}
-                                placeholder="Course default"
-                            />
-                        </Field>
-
-                        {/* Active */}
-                        <div className="flex items-center gap-3">
-                            <Toggle
-                                checked={data.is_active}
-                                onChange={(v) => setData('is_active', v)}
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
-                                {data.is_active ? 'Active (students can book)' : 'Inactive (hidden from booking)'}
-                            </span>
-                        </div>
-                    </Card>
-
-                    <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
-                        >
-                            {processing ? 'Saving…' : 'Save Schedule'}
-                        </button>
+                            <div className="flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+                                >
+                                    {processing ? 'Saving…' : 'Save Schedule'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
             </div>
         </>
     );

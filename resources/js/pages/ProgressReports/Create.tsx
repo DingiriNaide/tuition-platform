@@ -1,6 +1,7 @@
 import { Head, useForm, Link } from '@inertiajs/react';
 import { store } from '@/actions/App/Http/Controllers/ProgressReportController';
 import { show as showBooking } from '@/actions/App/Http/Controllers/BookingController';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface Booking {
     id: number;
@@ -68,165 +69,168 @@ export default function ProgressReportCreate({
 
     return (
         <>
-            <Head title="Create Progress Report" />
+            <div className="max-w-2xl mx-auto p-6 relative">
+                <LoadingOverlay show={processing} message="Saving Report…" variant="card" />
+                    <Head title="Create Progress Report" />
 
-            <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
 
-                <nav className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                    <Link
-                        href={showBooking.url(booking.id)}
-                        className="hover:text-emerald-600 dark:hover:text-emerald-400"
-                    >
-                        Booking #{booking.id}
-                    </Link>
-                    <span className="mx-2">›</span>
-                    <span className="text-gray-900 dark:text-white">Progress Report</span>
-                </nav>
-
-                <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">
-                    New Progress Report
-                </h1>
-                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                    {booking.course.title} · {booking.student_profile.full_name}
-                </p>
-
-                <form className="space-y-6">
-
-                    {/* Assessment */}
-                    <Card title="Assessment">
-                        <Field label="Overall Grade" error={errors.overall_grade} required>
-                            <select
-                                value={data.overall_grade}
-                                onChange={(e) => setData('overall_grade', e.target.value)}
-                                className={inp(!!errors.overall_grade)}
+                        <nav className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                            <Link
+                                href={showBooking.url(booking.id)}
+                                className="hover:text-emerald-600 dark:hover:text-emerald-400"
                             >
-                                <option value="">Select grade</option>
-                                {Object.entries(gradeOptions).map(([val, label]) => (
-                                    <option key={val} value={val}>{label}</option>
-                                ))}
-                            </select>
-                        </Field>
+                                Booking #{booking.id}
+                            </Link>
+                            <span className="mx-2">›</span>
+                            <span className="text-gray-900 dark:text-white">Progress Report</span>
+                        </nav>
 
-                        <Field label="Score (0–100)" error={errors.score}>
-                            <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={data.score}
-                                onChange={(e) => setData('score', e.target.value)}
-                                className={inp(!!errors.score)}
-                                placeholder="Optional numeric score"
-                            />
-                        </Field>
-
-                        <Field label="Strengths" error={errors.strengths}>
-                            <textarea
-                                value={data.strengths}
-                                onChange={(e) => setData('strengths', e.target.value)}
-                                rows={3}
-                                className={inp(!!errors.strengths)}
-                                placeholder="What the student does well..."
-                            />
-                        </Field>
-
-                        <Field label="Areas for Improvement" error={errors.areas_for_improvement}>
-                            <textarea
-                                value={data.areas_for_improvement}
-                                onChange={(e) => setData('areas_for_improvement', e.target.value)}
-                                rows={3}
-                                className={inp(!!errors.areas_for_improvement)}
-                                placeholder="Topics or skills that need more work..."
-                            />
-                        </Field>
-
-                        <Field label="Tutor Comments" error={errors.tutor_comments}>
-                            <textarea
-                                value={data.tutor_comments}
-                                onChange={(e) => setData('tutor_comments', e.target.value)}
-                                rows={4}
-                                className={inp(!!errors.tutor_comments)}
-                                placeholder="Overall observations and feedback..."
-                            />
-                        </Field>
-
-                        <Field label="Recommended Actions" error={errors.recommended_actions}>
-                            <textarea
-                                value={data.recommended_actions}
-                                onChange={(e) => setData('recommended_actions', e.target.value)}
-                                rows={3}
-                                className={inp(!!errors.recommended_actions)}
-                                placeholder="Steps the student should take next..."
-                            />
-                        </Field>
-                    </Card>
-
-                    {/* Period */}
-                    <Card title="Report Period">
-                        <div className="grid grid-cols-2 gap-4">
-                            <Field label="Period Start" error={errors.period_start} required>
-                                <input
-                                    type="date"
-                                    value={data.period_start}
-                                    onChange={(e) => setData('period_start', e.target.value)}
-                                    className={inp(!!errors.period_start)}
-                                />
-                            </Field>
-                            <Field label="Period End" error={errors.period_end} required>
-                                <input
-                                    type="date"
-                                    value={data.period_end}
-                                    onChange={(e) => setData('period_end', e.target.value)}
-                                    className={inp(!!errors.period_end)}
-                                />
-                            </Field>
-                        </div>
-                    </Card>
-
-                    {/* Attendance snapshot */}
-                    <Card title="Attendance Summary">
-                        <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                            Auto-filled from session records. Adjust if needed.
+                        <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">
+                            New Progress Report
+                        </h1>
+                        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+                            {booking.course.title} · {booking.student_profile.full_name}
                         </p>
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                            {([
-                                { key: 'total_sessions',    label: 'Total' },
-                                { key: 'attended_sessions', label: 'Attended' },
-                                { key: 'absent_sessions',   label: 'Absent' },
-                                { key: 'late_sessions',     label: 'Late' },
-                            ] as const).map(({ key, label }) => (
-                                <Field key={key} label={label} error={errors[key]}>
+
+                        <form className="space-y-6">
+
+                            {/* Assessment */}
+                            <Card title="Assessment">
+                                <Field label="Overall Grade" error={errors.overall_grade} required>
+                                    <select
+                                        value={data.overall_grade}
+                                        onChange={(e) => setData('overall_grade', e.target.value)}
+                                        className={inp(!!errors.overall_grade)}
+                                    >
+                                        <option value="">Select grade</option>
+                                        {Object.entries(gradeOptions).map(([val, label]) => (
+                                            <option key={val} value={val}>{label}</option>
+                                        ))}
+                                    </select>
+                                </Field>
+
+                                <Field label="Score (0–100)" error={errors.score}>
                                     <input
                                         type="number"
                                         min="0"
-                                        value={data[key]}
-                                        onChange={(e) => setData(key, e.target.value)}
-                                        className={inp(!!errors[key])}
+                                        max="100"
+                                        value={data.score}
+                                        onChange={(e) => setData('score', e.target.value)}
+                                        className={inp(!!errors.score)}
+                                        placeholder="Optional numeric score"
                                     />
                                 </Field>
-                            ))}
-                        </div>
-                    </Card>
 
-                    {/* Actions */}
-                    <div className="flex justify-end gap-3">
-                        <button
-                            type="button"
-                            disabled={processing}
-                            onClick={(e) => submit(e, false)}
-                            className="rounded-md border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-                        >
-                            {processing ? 'Saving…' : 'Save as Draft'}
-                        </button>
-                        <button
-                            type="button"
-                            disabled={processing}
-                            onClick={(e) => submit(e, true)}
-                            className="rounded-md bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
-                        >
-                            {processing ? 'Publishing…' : 'Publish to Student'}
-                        </button>
+                                <Field label="Strengths" error={errors.strengths}>
+                                    <textarea
+                                        value={data.strengths}
+                                        onChange={(e) => setData('strengths', e.target.value)}
+                                        rows={3}
+                                        className={inp(!!errors.strengths)}
+                                        placeholder="What the student does well..."
+                                    />
+                                </Field>
+
+                                <Field label="Areas for Improvement" error={errors.areas_for_improvement}>
+                                    <textarea
+                                        value={data.areas_for_improvement}
+                                        onChange={(e) => setData('areas_for_improvement', e.target.value)}
+                                        rows={3}
+                                        className={inp(!!errors.areas_for_improvement)}
+                                        placeholder="Topics or skills that need more work..."
+                                    />
+                                </Field>
+
+                                <Field label="Tutor Comments" error={errors.tutor_comments}>
+                                    <textarea
+                                        value={data.tutor_comments}
+                                        onChange={(e) => setData('tutor_comments', e.target.value)}
+                                        rows={4}
+                                        className={inp(!!errors.tutor_comments)}
+                                        placeholder="Overall observations and feedback..."
+                                    />
+                                </Field>
+
+                                <Field label="Recommended Actions" error={errors.recommended_actions}>
+                                    <textarea
+                                        value={data.recommended_actions}
+                                        onChange={(e) => setData('recommended_actions', e.target.value)}
+                                        rows={3}
+                                        className={inp(!!errors.recommended_actions)}
+                                        placeholder="Steps the student should take next..."
+                                    />
+                                </Field>
+                            </Card>
+
+                            {/* Period */}
+                            <Card title="Report Period">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Period Start" error={errors.period_start} required>
+                                        <input
+                                            type="date"
+                                            value={data.period_start}
+                                            onChange={(e) => setData('period_start', e.target.value)}
+                                            className={inp(!!errors.period_start)}
+                                        />
+                                    </Field>
+                                    <Field label="Period End" error={errors.period_end} required>
+                                        <input
+                                            type="date"
+                                            value={data.period_end}
+                                            onChange={(e) => setData('period_end', e.target.value)}
+                                            className={inp(!!errors.period_end)}
+                                        />
+                                    </Field>
+                                </div>
+                            </Card>
+
+                            {/* Attendance snapshot */}
+                            <Card title="Attendance Summary">
+                                <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                                    Auto-filled from session records. Adjust if needed.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                    {([
+                                        { key: 'total_sessions',    label: 'Total' },
+                                        { key: 'attended_sessions', label: 'Attended' },
+                                        { key: 'absent_sessions',   label: 'Absent' },
+                                        { key: 'late_sessions',     label: 'Late' },
+                                    ] as const).map(({ key, label }) => (
+                                        <Field key={key} label={label} error={errors[key]}>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={data[key]}
+                                                onChange={(e) => setData(key, e.target.value)}
+                                                className={inp(!!errors[key])}
+                                            />
+                                        </Field>
+                                    ))}
+                                </div>
+                            </Card>
+
+                            {/* Actions */}
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    disabled={processing}
+                                    onClick={(e) => submit(e, false)}
+                                    className="rounded-md border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    {processing ? 'Saving…' : 'Save as Draft'}
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={processing}
+                                    onClick={(e) => submit(e, true)}
+                                    className="rounded-md bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+                                >
+                                    {processing ? 'Publishing…' : 'Publish to Student'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
             </div>
         </>
     );

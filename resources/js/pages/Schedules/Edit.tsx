@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/ScheduleController';
 import { index } from '@/actions/App/Http/Controllers/ScheduleController';
 import { Link } from '@inertiajs/react';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface Course {
     id: number;
@@ -61,175 +62,178 @@ export default function ScheduleEdit({ schedule, courses, dayOptions }: Props) {
 
     return (
         <>
-            <Head title="Edit Schedule" />
+            <div className="max-w-2xl mx-auto p-6 relative">
+                <LoadingOverlay show={processing} message="Updating Schedule…" variant="card" />
+                    <Head title="Edit Schedule" />
 
-            <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-                <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Schedule</h1>
-                    <Link
-                        href={index.url()}
-                        className="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
-                    >
-                        ← Back to schedules
-                    </Link>
-                </div>
+                    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+                        <div className="mb-6 flex items-center justify-between">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Schedule</h1>
+                            <Link
+                                href={index.url()}
+                                className="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
+                            >
+                                ← Back to schedules
+                            </Link>
+                        </div>
 
-                <form onSubmit={submit} className="space-y-6">
-                    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <div className="space-y-4">
+                        <form onSubmit={submit} className="space-y-6">
+                            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                                <div className="space-y-4">
 
-                            {/* Course */}
-                            <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Course <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={data.course_id}
-                                    onChange={(e) => setData('course_id', e.target.value)}
-                                    className={inp(!!errors.course_id)}
-                                >
-                                    {courses.map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.title} — {c.subject.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {errors.course_id && <p className="mt-1 text-xs text-red-500">{errors.course_id}</p>}
-                            </div>
-
-                            {/* Recurring type */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Schedule Type
-                                </label>
-                                <div className="flex gap-4">
-                                    {[{ value: true, label: 'Weekly recurring' }, { value: false, label: 'One-off date' }].map(({ value, label }) => (
-                                        <label key={String(value)} className="flex cursor-pointer items-center gap-2 text-sm">
-                                            <input
-                                                type="radio"
-                                                checked={data.is_recurring === value}
-                                                onChange={() => setData('is_recurring', value)}
-                                                className="text-emerald-600"
-                                            />
-                                            {label}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {data.is_recurring ? (
-                                <>
+                                    {/* Course */}
                                     <div>
                                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Day of Week <span className="text-red-500">*</span>
+                                            Course <span className="text-red-500">*</span>
                                         </label>
                                         <select
-                                            value={data.day_of_week}
-                                            onChange={(e) => setData('day_of_week', e.target.value)}
-                                            className={inp(!!errors.day_of_week)}
+                                            value={data.course_id}
+                                            onChange={(e) => setData('course_id', e.target.value)}
+                                            className={inp(!!errors.course_id)}
                                         >
-                                            <option value="">Select day</option>
-                                            {Object.entries(dayOptions).map(([val, label]) => (
-                                                <option key={val} value={val}>{label}</option>
+                                            {courses.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.title} — {c.subject.name}
+                                                </option>
                                             ))}
                                         </select>
-                                        {errors.day_of_week && <p className="mt-1 text-xs text-red-500">{errors.day_of_week}</p>}
+                                        {errors.course_id && <p className="mt-1 text-xs text-red-500">{errors.course_id}</p>}
                                     </div>
+
+                                    {/* Recurring type */}
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Schedule Type
+                                        </label>
+                                        <div className="flex gap-4">
+                                            {[{ value: true, label: 'Weekly recurring' }, { value: false, label: 'One-off date' }].map(({ value, label }) => (
+                                                <label key={String(value)} className="flex cursor-pointer items-center gap-2 text-sm">
+                                                    <input
+                                                        type="radio"
+                                                        checked={data.is_recurring === value}
+                                                        onChange={() => setData('is_recurring', value)}
+                                                        className="text-emerald-600"
+                                                    />
+                                                    {label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {data.is_recurring ? (
+                                        <>
+                                            <div>
+                                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Day of Week <span className="text-red-500">*</span>
+                                                </label>
+                                                <select
+                                                    value={data.day_of_week}
+                                                    onChange={(e) => setData('day_of_week', e.target.value)}
+                                                    className={inp(!!errors.day_of_week)}
+                                                >
+                                                    <option value="">Select day</option>
+                                                    {Object.entries(dayOptions).map(([val, label]) => (
+                                                        <option key={val} value={val}>{label}</option>
+                                                    ))}
+                                                </select>
+                                                {errors.day_of_week && <p className="mt-1 text-xs text-red-500">{errors.day_of_week}</p>}
+                                            </div>
+                                            <div>
+                                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Repeat Until
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    value={data.recur_until}
+                                                    onChange={(e) => setData('recur_until', e.target.value)}
+                                                    className={inp(!!errors.recur_until)}
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Date <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={data.specific_date}
+                                                onChange={(e) => setData('specific_date', e.target.value)}
+                                                className={inp(!!errors.specific_date)}
+                                            />
+                                            {errors.specific_date && <p className="mt-1 text-xs text-red-500">{errors.specific_date}</p>}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Start Time <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="time"
+                                                value={data.start_time}
+                                                onChange={(e) => setData('start_time', e.target.value)}
+                                                className={inp(!!errors.start_time)}
+                                            />
+                                            {errors.start_time && <p className="mt-1 text-xs text-red-500">{errors.start_time}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                End Time <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="time"
+                                                value={data.end_time}
+                                                onChange={(e) => setData('end_time', e.target.value)}
+                                                className={inp(!!errors.end_time)}
+                                            />
+                                            {errors.end_time && <p className="mt-1 text-xs text-red-500">{errors.end_time}</p>}
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Repeat Until
+                                            Max Students Override
                                         </label>
                                         <input
-                                            type="date"
-                                            value={data.recur_until}
-                                            onChange={(e) => setData('recur_until', e.target.value)}
-                                            className={inp(!!errors.recur_until)}
+                                            type="number"
+                                            min="1"
+                                            value={data.max_students}
+                                            onChange={(e) => setData('max_students', e.target.value)}
+                                            className={inp(!!errors.max_students)}
+                                            placeholder="Course default"
                                         />
                                     </div>
-                                </>
-                            ) : (
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Date <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={data.specific_date}
-                                        onChange={(e) => setData('specific_date', e.target.value)}
-                                        className={inp(!!errors.specific_date)}
-                                    />
-                                    {errors.specific_date && <p className="mt-1 text-xs text-red-500">{errors.specific_date}</p>}
-                                </div>
-                            )}
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Start Time <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="time"
-                                        value={data.start_time}
-                                        onChange={(e) => setData('start_time', e.target.value)}
-                                        className={inp(!!errors.start_time)}
-                                    />
-                                    {errors.start_time && <p className="mt-1 text-xs text-red-500">{errors.start_time}</p>}
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        End Time <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="time"
-                                        value={data.end_time}
-                                        onChange={(e) => setData('end_time', e.target.value)}
-                                        className={inp(!!errors.end_time)}
-                                    />
-                                    {errors.end_time && <p className="mt-1 text-xs text-red-500">{errors.end_time}</p>}
+                                    <div className="flex items-center gap-3">
+                                        <label className="relative inline-flex cursor-pointer items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.is_active}
+                                                onChange={(e) => setData('is_active', e.target.checked)}
+                                                className="peer sr-only"
+                                            />
+                                            <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
+                                        </label>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                                            {data.is_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Max Students Override
-                                </label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={data.max_students}
-                                    onChange={(e) => setData('max_students', e.target.value)}
-                                    className={inp(!!errors.max_students)}
-                                    placeholder="Course default"
-                                />
+                            <div className="flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+                                >
+                                    {processing ? 'Saving…' : 'Save Changes'}
+                                </button>
                             </div>
-
-                            <div className="flex items-center gap-3">
-                                <label className="relative inline-flex cursor-pointer items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={data.is_active}
-                                        onChange={(e) => setData('is_active', e.target.checked)}
-                                        className="peer sr-only"
-                                    />
-                                    <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-emerald-600 peer-checked:after:translate-x-full dark:bg-gray-600" />
-                                </label>
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
-                                    {data.is_active ? 'Active' : 'Inactive'}
-                                </span>
-                            </div>
-                        </div>
+                        </form>
                     </div>
-
-                    <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
-                        >
-                            {processing ? 'Saving…' : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
             </div>
         </>
     );

@@ -4,6 +4,7 @@ import { useWebRTC } from '@/hooks/useWebRTC';
 import axios from 'axios';
 import { start, end, chat, hand, } from '@/actions/App/Http/Controllers/LiveSessionController';
 import { motion, AnimatePresence } from 'motion/react';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -49,6 +50,9 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
     const [showChat, setShowChat]              = useState(true);
     const [showParticipants, setShowParticipants] = useState(false);
     const [sessionEnded, setSessionEnded]      = useState(false);
+    const [isStarting, setIsStarting] = useState(false);
+    const [isEnding, setIsEnding]     = useState(false);
+    const [isJoining, setIsJoining]   = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -136,23 +140,38 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
     // ── Tutor controls ────────────────────────────────────────────────
 
     async function handleStart(): Promise<void> {
-        await connect();
-        await axios.post(start.url(liveSession.id));
-        setSessionStatus('live');
+        setIsStarting(true);
+        try {
+            await connect();
+            await axios.post(start.url(liveSession.id));
+            setSessionStatus('live');
+        } finally {
+            setIsStarting(false);
+        }
     }
 
     async function handleEnd(): Promise<void> {
         if (!confirm('End the session for all participants?')) return;
-        await axios.post(end.url(liveSession.id));
-        disconnect();
-        setSessionStatus('ended');
-        setSessionEnded(true);
+        setIsEnding(true);
+        try {
+            await axios.post(end.url(liveSession.id));
+            disconnect();
+            setSessionStatus('ended');
+            setSessionEnded(true);
+        } finally {
+            setIsEnding(false);
+        }
     }
 
     // ── Student join ──────────────────────────────────────────────────
 
     async function handleJoin(): Promise<void> {
-        await connect();
+        setIsJoining(true);
+        try {
+            await connect();
+        } finally {
+            setIsJoining(false);
+        }
     }
 
     // ── Chat ──────────────────────────────────────────────────────────
@@ -200,8 +219,8 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
                         The live session has ended.
                     </p>
                     <button
-                        onClick={() => router.visit('/')}
-                        className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                        onClick={() => router.visit('/dashboard')}
+                        className="rounded-md bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
                     >
                         Back to Dashboard
                     </button>
@@ -217,8 +236,24 @@ export default function LiveRoom({ liveSession, currentUser }: Props) {
         <>
             <Head title={`Live — ${liveSession.course.title}`} />
 
+            <LoadingOverlay
+                show={isStarting}
+                message="Starting session…"
+                variant="fullscreen"
+            />
+            <LoadingOverlay
+                show={isEnding}
+                message="Ending session…"
+                variant="fullscreen"
+            />
+            <LoadingOverlay
+                show={isJoining}
+                message="Joining session…"
+                variant="fullscreen"
+            />
+
             {/* Full-viewport layout — no page padding */}
-            <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-gray-950">
+            <div className="flex h-screen overflow-hidden bg-gray-950">
 
                 {/* ── Video grid ── */}
                 <div className="relative flex flex-1 flex-col">
