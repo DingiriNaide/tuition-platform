@@ -190,6 +190,19 @@ class CourseController extends Controller
             $canManage = true;
         }
 
+        $alreadyBooked = false;
+
+        if ($user) {
+            $studentProfile = \App\Models\StudentProfile::where('user_id', $user->id)->first();
+
+            if ($studentProfile) {
+                $alreadyBooked = \App\Models\Booking::where('student_profile_id', $studentProfile->id)
+                    ->where('course_id', $course->id)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->exists();
+            }
+        }
+
         $reviews = $course->reviews()
             ->with('studentProfile:id,full_name')
             ->latest()
@@ -210,6 +223,7 @@ class CourseController extends Controller
         return Inertia::render('Courses/Show', [
             'course'          => $course,
             'canManage'       => $canManage,
+            'alreadyBooked'   => $alreadyBooked,
             'gradeOptions'    => Course::gradeOptions(),
             'syllabusOptions' => Course::syllabusOptions(),
             'mediumOptions'   => Course::mediumOptions(),

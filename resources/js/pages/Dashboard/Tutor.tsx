@@ -161,7 +161,7 @@ export default function TutorDashboard({ profile, stats, pendingPayouts, totalEa
                                 <div className="flex flex-wrap gap-2">
                                     {profile.subjects.map(subject => (
                                         <span key={subject.id}
-                                            className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium">
+                                            className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium">
                                             {subject.name}
                                         </span>
                                     ))}

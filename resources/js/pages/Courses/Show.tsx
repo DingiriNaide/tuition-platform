@@ -44,6 +44,7 @@ interface Course {
 interface Props {
     course: Course;
     canManage: boolean;
+    alreadyBooked: boolean;
     gradeOptions: Record<string, string>;
     syllabusOptions: Record<string, string>;
     mediumOptions: Record<string, string>;
@@ -74,6 +75,7 @@ interface AuthUser {
 export default function CourseShow({
     course,
     canManage,
+    alreadyBooked,
     gradeOptions,
     syllabusOptions,
     mediumOptions,
@@ -365,13 +367,21 @@ export default function CourseShow({
 
                             {/* ── Booking button — behaviour depends on who is viewing ── */}
                             {isStudent ? (
-                                // Student: link to booking form pre-filled with this course
-                                <Link
-                                    href={`${createBooking.url()}?course_id=${course.id}`}
-                                    className="mt-4 block w-full rounded-md bg-emerald-600 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-                                >
-                                    Book a Session
-                                </Link>
+                                alreadyBooked ? (
+                                    <button
+                                        disabled
+                                        className="mt-4 block w-full cursor-not-allowed rounded-md bg-gray-200 py-2 text-center text-sm font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                                    >
+                                        You already own this course
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={`${createBooking.url()}?course_id=${course.id}`}
+                                        className="mt-4 block w-full rounded-md bg-emerald-600 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                                    >
+                                        Book a Session
+                                    </Link>
+                                )
                             ) : canManage ? (
                                 // Tutor/admin who owns the course: no booking, show edit shortcut
                                 <Link

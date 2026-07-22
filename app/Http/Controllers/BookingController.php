@@ -128,14 +128,14 @@ class BookingController extends Controller
             return back()->with('error', 'This schedule is fully booked.');
         }
 
-        // Prevent duplicate active bookings
+        // Prevent duplicate active bookings for this course (any schedule)
         $alreadyBooked = Booking::where('student_profile_id', $studentProfile->id)
-            ->where('schedule_id', $schedule->id)
+            ->where('course_id', $course->id)
             ->whereIn('status', ['pending', 'confirmed'])
             ->exists();
 
         if ($alreadyBooked) {
-            return back()->with('error', 'You already have an active booking for this schedule.');
+            return back()->with('error', 'You already have an active booking for this course.');
         }
 
         $startDate    = Carbon::parse($validated['start_date'])->timezone('Asia/Colombo');
